@@ -6,6 +6,9 @@
       "installTools": false
     }
   },
+  "remoteEnv": {
+    "BROWSER": "/usr/bin/true"
+  },
   "customizations": {
     "vscode": {
       "extensions": [

@@ -25,7 +25,7 @@
       "openFiles": ["README.md"]
     }
   },
-  "postCreateCommand": "pip install pandas numpy matplotlib seaborn scikit-learn polars plotnine",
+  "postCreateCommand": "R -e 'install.packages(\"tutorial.helpers\")' && pip install pandas numpy matplotlib seaborn scikit-learn polars plotnine",
   "postAttachCommand": {
     "R": "radian"
   }

@@ -16,7 +16,9 @@
       "settings": {
         "r.rterm.linux": "/usr/local/bin/radian",
         "r.bracketedPaste": true,
-        "r.plot.useHttpgd": true
+        "r.plot.useHttpgd": true,
+        "python.terminal.activateEnvironment": false,
+        "terminal.integrated.environmentChangesRelaunch": false
       }
     },
     "codespaces": {

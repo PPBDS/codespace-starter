@@ -17,5 +17,5 @@
       "openFiles": ["README.md"]
     }
   },
-  "postCreateCommand": "echo 'Ready to go!'"
+  "postAttachCommand": "radian"
 }

@@ -2,10 +2,10 @@
 
 ## Getting Started
 
-1. Click the green **Code** button above, then select the **Codespaces** tab.
-2. Click **Create codespace on main**.
-3. Wait a few minutes for the environment to build (this only happens the first time).
-4. Once VS Code opens in your browser, you're ready to go!
+1. Click the green **Use this template** button above, then select **Open in a codespace**.
+2. Wait a few minutes for the environment to build (this only happens the first time).
+3. Once VS Code opens in your browser, you should see an R console (radian) running in the terminal panel at the bottom.
+4. You're ready to go!
 
 ## Running R Code
 
@@ -17,6 +17,9 @@
 
 Plots appear automatically in a separate tab within VS Code. You can resize, zoom, and export them.
 
-## When You're Done
+## Important: Managing Your Free Hours
 
-Close your Codespace to stop billing. Click **Codespaces** in the bottom-left corner and select **Stop Current Codespace**. You can restart it anytime from https://github.com/codespaces.
+GitHub gives you **120 free core-hours per month** (or **180 hours** with the [GitHub Student Developer Pack](https://education.github.com/pack)). A running Codespace uses hours even if you aren't actively working.
+
+**When you're done working**, click **Codespaces** in the bottom-left corner and select **Stop Current Codespace**. You can restart it anytime from https://github.com/codespaces.
+```

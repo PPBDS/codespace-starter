@@ -1,11 +1,17 @@
 {
-  "name": "R Data Science",
+  "name": "R and Python Data Science",
   "image": "ghcr.io/rocker-org/devcontainer/tidyverse:4",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "installTools": false
+    }
+  },
   "customizations": {
     "vscode": {
       "extensions": [
         "reditorsupport.r",
-        "rdebugger.r-debugger"
+        "rdebugger.r-debugger",
+        "ms-python.python"
       ],
       "settings": {
         "r.rterm.linux": "/usr/local/bin/radian",
@@ -17,5 +23,8 @@
       "openFiles": ["README.md"]
     }
   },
-  "postAttachCommand": "radian"
+  "postCreateCommand": "pip install pandas numpy matplotlib seaborn scikit-learn polars plotnine",
+  "postAttachCommand": {
+    "R": "radian"
+  }
 }

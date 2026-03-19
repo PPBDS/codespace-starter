@@ -1,0 +1,21 @@
+{
+  "name": "R Data Science",
+  "image": "ghcr.io/rocker-org/devcontainer/tidyverse:4",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "reditorsupport.r",
+        "rdebugger.r-debugger"
+      ],
+      "settings": {
+        "r.rterm.linux": "/usr/local/bin/radian",
+        "r.bracketedPaste": true,
+        "r.plot.useHttpgd": true
+      }
+    },
+    "codespaces": {
+      "openFiles": ["README.md"]
+    }
+  },
+  "postCreateCommand": "echo 'Ready to go!'"
+}

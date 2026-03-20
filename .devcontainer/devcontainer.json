@@ -21,12 +21,11 @@
         "r.bracketedPaste": true,
         "r.plot.useHttpgd": true,
         "python.terminal.activateEnvironment": false,
-        "terminal.integrated.environmentChangesRelaunch": false
+        "terminal.integrated.environmentChangesRelaunch": false,
+        "workbench.auxiliarySidebar.visible": false
       }
     },
-    "codespaces": {
-      "openFiles": ["README.md"]
-    }
+    "codespaces": {}
   },
   "postCreateCommand": "R -e 'install.packages(\"tutorial.helpers\")' && pip install pandas numpy matplotlib seaborn scikit-learn polars plotnine",
   "postAttachCommand": {

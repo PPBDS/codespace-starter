@@ -9,9 +9,7 @@
       "extensions": [
         "reditorsupport.r",
         "rdebugger.r-debugger",
-        "quarto.quarto",
-        "ms-vscode.live-server",
-        "tomoki1207.pdf"
+        "quarto.quarto"
       ],
       "settings": {
         "r.rterm.linux": "/usr/local/bin/radian",
@@ -26,7 +24,7 @@
       "openFiles": []
     }
   },
-  "postCreateCommand": "R -e 'install.packages(\"tutorial.helpers\")'",
+  "postCreateCommand": "quarto install tinytex --no-prompt && R -e 'install.packages(\"tutorial.helpers\")'",
   "postAttachCommand": {
     "R": "radian"
   }

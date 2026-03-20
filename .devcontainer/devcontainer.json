@@ -8,7 +8,10 @@
     "vscode": {
       "extensions": [
         "reditorsupport.r",
-        "rdebugger.r-debugger"
+        "rdebugger.r-debugger",
+        "quarto.quarto",
+        "ms-vscode.live-server",
+        "tomoki1207.pdf"
       ],
       "settings": {
         "r.rterm.linux": "/usr/local/bin/radian",

@@ -24,7 +24,7 @@
       "openFiles": []
     }
   },
-  "postCreateCommand": "quarto install tinytex --no-prompt && R -e 'install.packages(\"tutorial.helpers\")'",
+  "postCreateCommand": "echo 'BROWSER=/usr/bin/true' >> /home/rstudio/.Renviron && quarto install tinytex --no-prompt && R -e 'install.packages(\"tutorial.helpers\")'",
   "postAttachCommand": {
     "R": "radian"
   }

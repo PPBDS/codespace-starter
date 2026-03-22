@@ -9,7 +9,8 @@
       "extensions": [
         "reditorsupport.r",
         "rdebugger.r-debugger",
-        "quarto.quarto"
+        "quarto.quarto",
+        "PPBDS.vscode-r-tutorials"
       ],
       "settings": {
         "r.rterm.linux": "/usr/local/bin/radian",

@@ -1,6 +1,9 @@
 {
   "name": "R Data Science",
   "image": "ghcr.io/rocker-org/devcontainer/tidyverse:4",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
   "remoteEnv": {
     "BROWSER": "/usr/bin/true"
   },
@@ -25,6 +28,6 @@
       "openFiles": []
     }
   },
-  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && quarto install tinytex --no-prompt && R -e 'install.packages(\"tutorial.helpers\")' && R -e 'pak::pak(\"PPBDS/positron.tutorials\")'",
+  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && quarto install tinytex --no-prompt && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))' && R -e 'pak::pak(\"PPBDS/positron.tutorials\")'",
   "postAttachCommand": ""
 }

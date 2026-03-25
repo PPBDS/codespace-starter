@@ -28,6 +28,5 @@
       "openFiles": []
     }
   },
-  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && quarto install tinytex --no-prompt && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))' && R -e 'pak::pak(\"PPBDS/positron.tutorials\")'",
-  "postAttachCommand": "echo 'unset GITHUB_TOKEN' >> ~/.bashrc"
+  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && quarto install tinytex --no-prompt && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))' && R -e 'pak::pak(\"PPBDS/positron.tutorials\")'"
 }

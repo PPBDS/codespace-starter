@@ -16,12 +16,48 @@
         "PPBDS.vscode-r-tutorials"
       ],
       "settings": {
+        // Use arf (Rust-based R console) instead of the default R terminal.
+        // Replaces radian, which is no longer actively developed.
         "r.rterm.linux": "/home/rstudio/.cargo/bin/arf",
+
+        // Required for arf/radian-style consoles to handle pasted code correctly.
         "r.bracketedPaste": true,
+
+        // Render plots inside VS Code via the httpgd graphics device
+        // instead of opening an external window (which doesn't work in Codespaces).
         "r.plot.useHttpgd": true,
+
+        // Prevent VS Code from nagging to relaunch the terminal when
+        // environment variables change.
         "terminal.integrated.environmentChangesRelaunch": false,
+
+        // Hide the secondary side bar (right panel) by default to reduce clutter.
         "workbench.secondarySideBar.defaultVisibility": "hidden",
-        "workbench.startupEditor": "none"
+
+        // Don't show a Welcome tab or changelog on startup.
+        "workbench.startupEditor": "none",
+
+        // Auto-stage all changes on commit so students don't get a confusing
+        // dialog asking whether to stage files.
+        "git.enableSmartCommit": true,
+
+        // Don't prompt "are you sure?" before push/pull.
+        "git.confirmSync": false,
+
+        // Don't fetch from the remote in the background. Keeps things
+        // predictable and avoids confusing status bar changes.
+        "git.autofetch": false,
+
+        // Auto-save files after a short delay. Prevents the #1 beginner
+        // problem: "my code isn't working" because the file wasn't saved.
+        "files.autoSave": "afterDelay",
+
+        // Stop VS Code from suggesting random extensions students don't need.
+        "extensions.ignoreRecommendations": true,
+
+        // Prevent the "open repository in parent folder?" prompt that
+        // confuses students who don't understand nested git repos.
+        "git.openRepositoryInParentFolders": "never"
       }
     },
     "codespaces": {

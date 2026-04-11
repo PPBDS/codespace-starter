@@ -47,8 +47,9 @@
         // This is where Copilot Chat / Agent UI usually appears.
         "workbench.secondarySideBar.defaultVisibility": "hidden",
 
-        // Don't show a Welcome tab or changelog on startup.
+        // Don't show a Welcome tab or release notes or changelog on startup.
         "workbench.startupEditor": "none",
+        "update.showReleaseNotes": false,
 
         // Disable Copilot Chat UI elements that create the confusing
         // "Build with Agent" panel.
@@ -86,10 +87,9 @@
     },
 
     "codespaces": {
-
-      // Do not automatically open any files on startup.
-      // Keeps the interface visually simple.
-      "openFiles": []
+      "openFiles": [
+        ".devcontainer/READY.md"
+      ]
     }
   },
 
@@ -99,5 +99,6 @@
   "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))'",
 
   // Ensures right sidebar stays closed and clearly signals readiness
-  "postStartCommand": "code --command workbench.action.closeAuxiliaryBar && echo '✅ Codespace ready. Let's do some data science!'"
+  "postStartCommand": "code --uninstall-extension GitHub.copilot-chat || true && code --uninstall-extension GitHub.copilot || true && code --command workbench.action.closeAuxiliaryBar",
+  "postStartCommand": "code --command workbench.action.closeAuxiliaryBar"
 }

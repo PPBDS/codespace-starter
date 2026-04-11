@@ -1,21 +1,33 @@
 {
   "name": "R Data Science",
+
+  // Base tidyverse image maintained by rocker
   "image": "ghcr.io/rocker-org/devcontainer/tidyverse:4",
+
   "features": {
+    // GitHub CLI is occasionally useful for authentication tasks
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
+
+  // Prevent tools from trying to open external browser windows
+  // (which do not work well inside Codespaces)
   "remoteEnv": {
     "BROWSER": "/usr/bin/true"
   },
+
   "customizations": {
     "vscode": {
+
+      // Extensions students actually need
       "extensions": [
         "reditorsupport.r",
         "rdebugger.r-debugger",
         "quarto.quarto",
         "PPBDS.vscode-r-tutorials"
       ],
+
       "settings": {
+
         // Use arf (Rust-based R console) instead of the default R terminal.
         // Replaces radian, which is no longer actively developed.
         "r.rterm.linux": "/home/rstudio/.cargo/bin/arf",
@@ -32,10 +44,22 @@
         "terminal.integrated.environmentChangesRelaunch": false,
 
         // Hide the secondary side bar (right panel) by default to reduce clutter.
+        // This is where Copilot Chat / Agent UI usually appears.
         "workbench.secondarySideBar.defaultVisibility": "hidden",
 
         // Don't show a Welcome tab or changelog on startup.
         "workbench.startupEditor": "none",
+
+        // Disable Copilot Chat UI elements that create the confusing
+        // "Build with Agent" panel.
+        "github.copilot.chat.enabled": false,
+        "chat.commandCenter.enabled": false,
+
+        // Prevent Codespaces onboarding screens like the blue
+        // "Finish Setup" button.
+        "workbench.welcome.enabled": false,
+        "workbench.tips.enabled": false,
+        "update.showReleaseNotes": false,
 
         // Auto-stage all changes on commit so students don't get a confusing
         // dialog asking whether to stage files.
@@ -60,9 +84,20 @@
         "git.openRepositoryInParentFolders": "never"
       }
     },
+
     "codespaces": {
+
+      // Do not automatically open any files on startup.
+      // Keeps the interface visually simple.
       "openFiles": []
     }
   },
-  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh && quarto install tinytex --no-prompt && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))' && R -e 'pak::pak(\"PPBDS/positron.tutorials\")'"
+
+  // Install arf console and required R packages.
+  // TinyTeX removed to significantly reduce startup time.
+  // positron.tutorials will install automatically if students use tutorials.
+  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))'",
+
+  // Ensures right sidebar stays closed and clearly signals readiness
+  "postStartCommand": "code --command workbench.action.closeAuxiliaryBar && echo '✅ Codespace ready. Let's do some data science!'"
 }

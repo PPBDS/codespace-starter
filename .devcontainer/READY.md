@@ -1,3 +1,1 @@
-# Codespace Ready
-
-You can begin working now.
+# Setting up . . . Please be patient!

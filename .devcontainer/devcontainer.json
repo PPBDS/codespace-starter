@@ -67,6 +67,10 @@
         // confuses students who don't understand nested git repos.
         "git.openRepositoryInParentFolders": "never",
 
+        // Send keyboard shortcuts to the terminal program instead of
+        // letting VS Code handle them. Needed for arf's up-arrow history.
+        "terminal.integrated.sendKeybindingsToShell": true,
+
         // Prevent extensions from opening walkthrough tabs on first install.
         "workbench.welcomePage.walkthroughs.openOnInstall": false
       }

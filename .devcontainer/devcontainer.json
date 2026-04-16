@@ -76,7 +76,20 @@
         "terminal.integrated.defaultProfile.linux": "R Terminal",
 
         // Prevent extensions from opening walkthrough tabs on first install.
-        "workbench.welcomePage.walkthroughs.openOnInstall": false
+        "workbench.welcomePage.walkthroughs.openOnInstall": false,
+
+        // Wrap long lines so students don't think code disappeared
+        // off the right edge of the screen.
+        "editor.wordWrap": "on",
+
+        // Disable the minimap — beginners don't use it and it wastes
+        // screen space, especially on Chromebooks and small laptops.
+        "editor.minimap.enabled": false,
+
+        // Prevent VS Code from opening files in "preview" mode (italic
+        // tab title) which silently replaces the tab when another file
+        // is clicked. Beginners think their file vanished.
+        "workbench.editor.enablePreview": false
       }
     }
   },

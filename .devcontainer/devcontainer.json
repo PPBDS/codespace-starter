@@ -4,11 +4,6 @@
   // Base tidyverse image maintained by rocker
   "image": "ghcr.io/rocker-org/devcontainer/tidyverse:4",
 
-  "features": {
-    // GitHub CLI is occasionally useful for authentication tasks
-    "ghcr.io/devcontainers/features/github-cli:1": {}
-  },
-
   // Prevent tools from trying to open external browser windows
   // (which do not work well inside Codespaces)
   "remoteEnv": {
@@ -21,7 +16,6 @@
       // Extensions students actually need
       "extensions": [
         "reditorsupport.r",
-        "rdebugger.r-debugger",
         "quarto.quarto",
         "PPBDS.vscode-r-tutorials"
       ],
@@ -67,14 +61,6 @@
         // confuses students who don't understand nested git repos.
         "git.openRepositoryInParentFolders": "never",
 
-        // Send keyboard shortcuts to the terminal program instead of
-        // letting VS Code handle them. Needed for arf's up-arrow history.
-        "terminal.integrated.sendKeybindingsToShell": true,
-
-        // Make the R terminal the default so clicking "+" opens R directly
-        // and auto-focuses it, instead of opening a bash shell.
-        "terminal.integrated.defaultProfile.linux": "R Terminal",
-
         // Prevent extensions from opening walkthrough tabs on first install.
         "workbench.welcomePage.walkthroughs.openOnInstall": false,
 
@@ -94,6 +80,7 @@
     }
   },
 
-  // Install arf console and required R packages.
-  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))'"
+// Run the setup script to install tools and R packages.
+  // See .devcontainer/setup.sh for details on each step.
+  "postCreateCommand": "bash .devcontainer/setup.sh"
 }

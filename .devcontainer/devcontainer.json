@@ -65,7 +65,10 @@
 
         // Prevent the "open repository in parent folder?" prompt that
         // confuses students who don't understand nested git repos.
-        "git.openRepositoryInParentFolders": "never"
+        "git.openRepositoryInParentFolders": "never",
+
+        // Prevent extensions from opening walkthrough tabs on first install.
+        "workbench.welcomePage.walkthroughs.openOnInstall": false
       }
     }
   },

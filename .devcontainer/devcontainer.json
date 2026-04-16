@@ -71,32 +71,14 @@
 
     "codespaces": {
       // Opens READY.md immediately (shows "Setting up..." message).
-      // postAttachCommand overwrites it with "Ready" when setup completes.
+      // postCreateCommand overwrites it with "Ready" when setup completes.
       "openFiles": [
         ".devcontainer/READY.md"
       ]
     }
   },
 
-  // Install arf console and required R packages. The heavy lifting
-  // happens here so postAttachCommand stays fast.
-  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))'",
-
-  // Install custom keybindings and signal that setup is complete.
-  //
-  // This must be postAttachCommand (not postCreateCommand) because
-  // VS Code loads keybindings into memory at attach time — a file
-  // placed earlier gets ignored or overwritten. The downside is that
-  // postAttachCommand output briefly appears in a terminal panel.
-  // We suppress it with > /dev/null 2>&1 to keep things clean.
-  //
-  // Keybindings: The R extension doesn't expose a "restart R" command,
-  // so we bind Ctrl+Shift+0 (mirroring Positron's Cmd+Shift+0) to
-  // send q('no') to the terminal, quitting R without saving the
-  // workspace. The R extension auto-launches a new session when code
-  // is next sent. Source file: .devcontainer/keybindings.json.
-  //
-  // READY.md is updated last so students don't see "Ready" until
-  // everything is truly finished.
-  "postAttachCommand": "mkdir -p $HOME/.vscode-remote/data/User && cp .devcontainer/keybindings.json $HOME/.vscode-remote/data/User/keybindings.json && printf '# Codespace Ready\\n\\nYou can begin working now.\\n\\nYou may close the right panel and dismiss any setup prompts.' > .devcontainer/READY.md > /dev/null 2>&1"
+  // Install arf console and required R packages, then overwrite READY.md
+  // to signal that the Codespace is ready.
+  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))' && printf '# Codespace Ready\\n\\nYou can begin working now.\\n\\nYou may close the right panel and dismiss any setup prompts.' > .devcontainer/READY.md"
 }

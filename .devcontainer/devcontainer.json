@@ -71,26 +71,26 @@
 
     "codespaces": {
       // Opens READY.md immediately (shows "Setting up..." message).
-      // postAttachCommand overwrites it with "Ready" when setup completes.
+      // postCreateCommand overwrites it with "Ready" when setup completes.
       "openFiles": [
         ".devcontainer/READY.md"
       ]
     }
   },
 
-  // Install arf console and required R packages. Note that READY.md is
-  // NOT updated here — that happens at the end of postAttachCommand so
-  // students don't see "Ready" until everything is truly finished.
-  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))'",
-
-  // Install custom keybindings after VS Code attaches to the container.
-  // The R extension for VS Code doesn't expose a "restart R" command, so
-  // we bind Ctrl+Shift+0 (mirroring Positron's Cmd+Shift+0) to send
-  // q('no') to the terminal, which quits R without saving the workspace.
-  // The R extension auto-launches a new session when code is next sent.
-  // The keybindings source file lives at .devcontainer/keybindings.json.
-  // We use postAttachCommand (not postCreateCommand) because the
-  // .vscode-remote directory only exists after VS Code has connected.
-  // Finally, overwrite READY.md to signal that setup is complete.
-  "postAttachCommand": "mkdir -p $HOME/.vscode-remote/data/User && cp .devcontainer/keybindings.json $HOME/.vscode-remote/data/User/keybindings.json && printf '# Codespace Ready\\n\\nYou can begin working now.\\n\\nYou may close the right panel and dismiss any setup prompts.' > .devcontainer/READY.md"
+  // Install arf console, required R packages, and custom keybindings,
+  // then overwrite READY.md to signal that the Codespace is ready.
+  //
+  // Keybindings: The R extension for VS Code doesn't expose a "restart R"
+  // command, so we install a keybindings.json that binds Ctrl+Shift+0
+  // (mirroring Positron's Cmd+Shift+0) to send q('no') to the terminal,
+  // which quits R without saving the workspace. The R extension
+  // auto-launches a new session when code is next sent. The keybindings
+  // source file lives at .devcontainer/keybindings.json. We pre-create
+  // the .vscode-remote/data/User directory here; VS Code discovers the
+  // file when it attaches after postCreateCommand finishes.
+  //
+  // READY.md is updated last so students don't see "Ready" until
+  // everything is truly finished.
+  "postCreateCommand": "printf '#!/bin/sh\\nexit 0' | sudo tee /usr/local/bin/xdg-open > /dev/null && sudo chmod +x /usr/local/bin/xdg-open && curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh && R -e 'install.packages(c(\"tutorial.helpers\", \"quarto\"))' && mkdir -p $HOME/.vscode-remote/data/User && cp .devcontainer/keybindings.json $HOME/.vscode-remote/data/User/keybindings.json && printf '# Codespace Ready\\n\\nYou can begin working now.\\n\\nYou may close the right panel and dismiss any setup prompts.' > .devcontainer/READY.md"
 }

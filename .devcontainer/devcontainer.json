@@ -71,6 +71,9 @@
         // letting VS Code handle them. Needed for arf's up-arrow history.
         "terminal.integrated.sendKeybindingsToShell": true,
 
+        // Automatically focus the terminal when a new terminal is created.
+        "terminal.integrated.tabs.focusMode": "singleClick",
+
         // Prevent extensions from opening walkthrough tabs on first install.
         "workbench.welcomePage.walkthroughs.openOnInstall": false
       }

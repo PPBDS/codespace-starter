@@ -1,8 +1,24 @@
 {
-  "name": "R Data Science",
+  "name": "Preceptor's Primer",
 
   // Base tidyverse image maintained by rocker
   "image": "ghcr.io/rocker-org/devcontainer/tidyverse:4",
+
+  // Install the GitHub CLI (`gh`) into the codespace so it's
+  // available on the terminal alongside `git`. Students don't
+  // need `gh` for basic work — `git push` back to the repo they
+  // launched the codespace from already works via the codespace's
+  // built-in GitHub token. But having `gh` preinstalled means
+  // tutorials or instructors can use commands like `gh pr create`,
+  // `gh run watch`, and `gh repo clone` without an extra setup step.
+  //
+  // Note for instructors: pushing to repos OTHER than the codespace's
+  // home repo (e.g., cloning and pushing to a sibling package) requires
+  // a one-time `gh auth login` per codespace. This is intentional —
+  // the built-in token is read-mostly outside the home repo by design.
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
 
   // Prevent tools from trying to open external browser windows
   // (which do not work well inside Codespaces)
@@ -80,7 +96,7 @@
     }
   },
 
-// Run the setup script to install tools and R packages.
+  // Run the setup script to install tools and R packages.
   // See .devcontainer/setup.sh for details on each step.
   "postCreateCommand": "bash .devcontainer/setup.sh"
 }

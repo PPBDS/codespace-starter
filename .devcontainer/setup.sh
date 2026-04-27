@@ -14,7 +14,12 @@ sudo chmod +x /usr/local/bin/xdg-open
 curl --proto '=https' --tlsv1.2 -LsSf \
   https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh
 
+# Install pak first — it's faster than install.packages() and handles
+# both CRAN and GitHub installs with one consistent syntax.
+R -e 'install.packages("pak", repos = sprintf("https://r-lib.github.io/p/pak/stable/%s/%s/%s", .Platform$pkgType, R.Version()$os, R.Version()$arch))'
+
 # Install R packages needed for the course.
-#   - tutorial.helpers: infrastructure for learnr-based tutorials
-#   - quarto: R interface to Quarto for rendering and publishing
-R -e 'install.packages(c("tutorial.helpers"))'
+#   - PPBDS/tutorial.helpers: infrastructure for learnr-based tutorials
+#     (installed from GitHub to track the development version used by
+#     the rest of the PPBDS ecosystem; the CRAN version may lag)
+R -e 'pak::pkg_install("PPBDS/tutorial.helpers")'

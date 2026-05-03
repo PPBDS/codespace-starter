@@ -1,7 +1,7 @@
 {
   "name": "Preceptor's Primer",
 
-  // PPBDS student image, pinned to v0.1.0. Bumping is a deliberate
+  // PPBDS student image, pinned to v0.1.1. Bumping is a deliberate
   // edit to this line — never use `:latest` in student-facing config,
   // since it would float silently with every push to PPBDS/devcontainers.
   // Bakes in: gh, quarto, arf (Rust R console), httpgd, pak, and
@@ -12,7 +12,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainers/student:0.1.0",
+  "image": "ghcr.io/ppbds/devcontainers/student:0.1.1",
 
   "customizations": {
     "vscode": {

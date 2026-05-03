@@ -1,16 +1,18 @@
 {
   "name": "Preceptor's Primer",
 
-  // PPBDS student image, built from PPBDS/devcontainers. Pinned by tag
-  // here so we control when students pick up changes. Bakes in: gh,
-  // quarto, arf (Rust R console), httpgd, pak, and tutorial.helpers.
+  // PPBDS student image, pinned to v0.1.0. Bumping is a deliberate
+  // edit to this line — never use `:latest` in student-facing config,
+  // since it would float silently with every push to PPBDS/devcontainers.
+  // Bakes in: gh, quarto, arf (Rust R console), httpgd, pak, and
+  // tutorial.helpers. See https://github.com/PPBDS/devcontainers.
   //
   // Note for instructors: `gh` is preinstalled and authenticated against
   // the Codespace's home repo via the built-in GITHUB_TOKEN. Pushing to
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainers/student:latest",
+  "image": "ghcr.io/ppbds/devcontainers/student:0.1.0",
 
   "customizations": {
     "vscode": {

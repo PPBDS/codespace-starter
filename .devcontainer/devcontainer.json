@@ -1,19 +1,25 @@
 {
   "name": "Preceptor's Primer",
 
-  // PPBDS student image, pinned to v0.1.2. Bumping is a deliberate
+  // PPBDS student image, pinned to v0.2.0. Bumping is a deliberate
   // edit to this line — never use `:latest` in student-facing config,
   // since it would float silently with every push to PPBDS/devcontainers.
+  //
   // Bakes in: gh, quarto, arf (Rust R console), httpgd, pak,
-  // tutorial.helpers, and vscode.tutorials. See
-  // https://github.com/PPBDS/devcontainers.
+  // tutorial.helpers, vscode.tutorials, and three AI coding CLIs:
+  //   - claude  (Anthropic)         — needs ANTHROPIC_API_KEY
+  //   - gemini  (Google)            — free tier available, else GOOGLE_API_KEY
+  //   - aider   (multi-provider)    — DeepSeek/OpenRouter for cheap models
+  // Students set the API keys for whichever tools they use as Codespaces
+  // user secrets at https://github.com/settings/codespaces. See
+  // https://github.com/PPBDS/devcontainers for details.
   //
   // Note for instructors: `gh` is preinstalled and authenticated against
   // the Codespace's home repo via the built-in GITHUB_TOKEN. Pushing to
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainers/student:0.1.2",
+  "image": "ghcr.io/ppbds/devcontainers/student:0.2.0",
 
   "customizations": {
     "vscode": {

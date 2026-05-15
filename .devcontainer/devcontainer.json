@@ -28,7 +28,8 @@
       "extensions": [
         "reditorsupport.r",
         "quarto.quarto",
-        "PPBDS.vscode-r-tutorials"
+        "PPBDS.vscode-r-tutorials",
+        "google.gemini-cli-vscode-ide-companion"
       ],
 
       "settings": {

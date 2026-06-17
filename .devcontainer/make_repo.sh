@@ -60,6 +60,20 @@ else
   gh repo create "$repo" --private --clone
 fi
 
+# 4b. Give the new repo the launchpad's VS Code settings. The devcontainer
+#     applies those (arf R console, autosave, git.autofetch off, …) at the
+#     Codespace's Machine scope, which a *separately-opened* folder does NOT
+#     inherit — that's why the "run git fetch automatically?" prompt appeared,
+#     and why the R console would otherwise fall back to the default, once you
+#     open your own repo. Copy them in as this repo's own workspace settings,
+#     which are always honored for this folder. Skip if the repo already has
+#     settings (e.g. a returning student's repo, cloned with them committed).
+machine_settings="$HOME/.vscode-remote/data/Machine/settings.json"
+if [[ -f "$machine_settings" && ! -f "/workspaces/$repo/.vscode/settings.json" ]]; then
+  mkdir -p "/workspaces/$repo/.vscode"
+  cp "$machine_settings" "/workspaces/$repo/.vscode/settings.json"
+fi
+
 # 5. Record that this student now has a work repo, so the welcome banner
 #    switches from "create a project" to "here's your project." postAttachCommand
 #    always runs in the codespace-starter folder, so the banner can't detect the

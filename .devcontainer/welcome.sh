@@ -12,7 +12,6 @@
 set -uo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # the .devcontainer dir
-root="$(dirname "$here")"                              # the repo root
 
 cat <<BANNER
 
@@ -22,7 +21,7 @@ cat <<BANNER
    Start your own project (creates + opens a new repo):
        bash ${here}/make_repo.sh <repo-name>
 
-   Full guide: STUDENT_WORKFLOW.md
+   Full guide: .devcontainer/STUDENT_WORKFLOW.md (opening now)
 ════════════════════════════════════════════════════════════
 
 BANNER
@@ -30,7 +29,7 @@ BANNER
 # Open the guide once per Codespace, so students land on instructions the first
 # time without it reopening every time they resume.
 marker="$HOME/.welcomed"
-guide="$root/STUDENT_WORKFLOW.md"
+guide="$here/STUDENT_WORKFLOW.md"
 if [[ ! -f "$marker" && -f "$guide" ]] && command -v code >/dev/null 2>&1; then
   code "$guide" || true
   touch "$marker"

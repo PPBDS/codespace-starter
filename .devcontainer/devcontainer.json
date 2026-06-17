@@ -59,14 +59,18 @@
   // to pinning a tested release tag here and bumping it deliberately.)
   "postCreateCommand": "R -q -e 'pak::pkg_install(c(\"PPBDS/tutorial.helpers\", \"PPBDS/vscode.tutorials\"), ask = FALSE)'",
 
-  // Visual "setup complete" signal for students. In the devcontainer
-  // lifecycle, VS Code extensions are installed BEFORE this hook runs, so
-  // by the time this banner prints, everything (extensions, R, Quarto,
-  // the AI CLIs) is genuinely ready — it can't fire early and mislead.
-  // Runs on every container start (it's cheap), which also reassures
-  // students each time they resume a Codespace. If a real setup step is
-  // ever needed, add it ABOVE the banner so the banner stays last.
-  "postStartCommand": "echo '' && echo '════════════════════════════════════════════' && echo '' && echo '   ✅  YOUR CODESPACE IS READY' && echo '' && echo '   All extensions and tools are installed.' && echo '   You can start working now.' && echo '' && echo '════════════════════════════════════════════' && echo ''",
+  // "Setup complete" signal + onboarding, via postAttachCommand — NOT
+  // postStartCommand. This distinction is the whole point: in Codespaces,
+  // postStartCommand (and postCreateCommand) output is routed to the hidden
+  // creation log, so a banner there is invisible — students finish the wait
+  // staring at a bare prompt. postAttachCommand runs in a VISIBLE terminal,
+  // and since the lifecycle order is postCreate → postStart → postAttach, it
+  // fires only after the slow pak install (postCreateCommand) has finished.
+  // So the banner is both actually seen AND a true "ready" signal. The script
+  // also opens STUDENT_WORKFLOW.md once per Codespace. Absolute path via
+  // ${containerWorkspaceFolder} so it still resolves after a student switches
+  // their open folder to their own repo. See welcome.sh for details.
+  "postAttachCommand": "bash ${containerWorkspaceFolder}/.devcontainer/welcome.sh",
 
   "customizations": {
     "vscode": {
@@ -107,9 +111,10 @@
         // "workbench.startupEditor": "none" line here is a confirmed no-op in
         // Codespaces (see microsoft/vscode#134073, #160635, #242243) — it was
         // removed rather than left as dead config that looks like it works.
-        // Revisit if that bug is ever fixed. Workaround for now: ship our own
-        // welcome doc and open it via postAttachCommand so students land on
-        // our content instead of VS Code's generic Welcome tab.
+        // Revisit if that bug is ever fixed. Workaround (now implemented):
+        // postAttachCommand runs .devcontainer/welcome.sh, which opens
+        // STUDENT_WORKFLOW.md so students land on our content instead of VS
+        // Code's generic Welcome tab.
 
         // Auto-stage all changes on commit so students don't get a confusing
         // dialog asking whether to stage files.

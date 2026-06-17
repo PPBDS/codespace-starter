@@ -24,12 +24,15 @@ if [[ -f "$marker" ]]; then
   cat <<BANNER
 
 ════════════════════════════════════════════════════════════
-   📂  Your project repo:  ${repo}
+   📂  Your repo: ${repo}
 
-   Open it:  File → Open Folder → /workspaces/${repo}
-   Save:     commit + push  (Source Control panel, left)
-   Guide:    ${guide}
+   • Explorer shows ${repo}?  You're in it — commit & push via
+     the Source Control panel (left).
+   • If not:  File → Open Folder → /workspaces/${repo}
+   • This launcher terminal stays in codespace-starter — open a
+     NEW terminal (＋ above) for git/quarto commands in your repo.
 
+   Guide: ${guide}
    Type \`clear\` to remove this banner.
 ════════════════════════════════════════════════════════════
 

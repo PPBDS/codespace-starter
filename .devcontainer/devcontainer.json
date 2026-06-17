@@ -12,7 +12,7 @@
   // work in a copy → they don't, and we'd need another plan (prebuilds on
   // the assignment repos, or just accept the cold first start).
 
-  // PPBDS student image, pinned to v0.3.1. Bumping is a deliberate
+  // PPBDS student image, pinned to v0.3.2. Bumping is a deliberate
   // edit to this line — never use `:latest` in student-facing config,
   // since it would float silently with every push to PPBDS/devcontainers.
   //
@@ -30,7 +30,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainers/student:0.3.1",
+  "image": "ghcr.io/ppbds/devcontainers/student:0.3.2",
 
   // Refresh the fast-moving PPBDS course packages to the latest commit on
   // each one's default branch, every time a Codespace is created. The

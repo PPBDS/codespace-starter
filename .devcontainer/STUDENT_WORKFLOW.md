@@ -18,9 +18,13 @@ bash .devcontainer/make_repo.sh my-class-work
 asks you to **authorize** — click through it, then come back. The script then:
 
 - signs you in as yourself,
-- creates a new private repo under your GitHub account,
-- downloads it into the Codespace, and
-- **opens it as your workspace** (the window reloads into your repo).
+- creates a new private repo under your GitHub account, and
+- downloads it into the Codespace at `/workspaces/<name>`.
+
+Then **open your repo as the workspace**: **File → Open Folder →
+`/workspaces/<name>`**. (The editor may switch on its own; if it doesn't, use
+that menu — it's the reliable way.) Once it's open, the Explorer, the Source
+Control panel, and your terminal all act on *your* repo.
 
 You only authorize once per Codespace.
 

@@ -12,37 +12,38 @@
 set -uo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # codespace-starter/.devcontainer
-launchpad="$(dirname "$here")"                          # the codespace-starter launchpad folder
 guide="$here/STUDENT_WORKFLOW.md"
+marker="$HOME/.student_repo"
 
-# postAttachCommand runs with the currently-open folder as its working
-# directory, so $PWD tells us where the student is. On the launchpad
-# (codespace-starter) we nudge them to create a repo; once they've moved into
-# their own repo we switch to a "you're set up, here's how to save" banner.
-if [[ "${PWD:-$launchpad}" == "$launchpad" ]]; then
+# postAttachCommand always runs in the codespace-starter folder (not the
+# student's open folder), so the banner can't detect progress by directory.
+# Instead, make_repo.sh drops a marker once a repo has been created; we key the
+# banner off that — nudge to create one until it exists, then point at it.
+if [[ -f "$marker" ]]; then
+  repo="$(cat "$marker" 2>/dev/null || true)"
   cat <<BANNER
 
 ════════════════════════════════════════════════════════════
-   ✅  YOUR CODESPACE IS READY
+   📂  Your project repo:  ${repo}
 
-   Start your own project (creates + opens a new repo):
-       bash ${here}/make_repo.sh <repo-name>
-
-   Full guide: ${guide}
+   Open it:  File → Open Folder → /workspaces/${repo}
+   Save:     commit + push  (Source Control panel, left)
+   Guide:    ${guide}
 
    Type \`clear\` to remove this banner.
 ════════════════════════════════════════════════════════════
 
 BANNER
 else
-  repo="$(basename "${PWD}")"
   cat <<BANNER
 
 ════════════════════════════════════════════════════════════
-   📂  You're working in:  ${repo}
+   ✅  YOUR CODESPACE IS READY
 
-   Save your work:     commit + push  (Source Control panel, left)
-   Publish a graphic:  see ${guide}
+   Start your own project (creates a new repo):
+       bash ${here}/make_repo.sh <repo-name>
+
+   Full guide: ${guide}
 
    Type \`clear\` to remove this banner.
 ════════════════════════════════════════════════════════════

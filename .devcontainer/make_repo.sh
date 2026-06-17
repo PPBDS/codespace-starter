@@ -60,30 +60,33 @@ else
   gh repo create "$repo" --private --clone
 fi
 
-# 5. Move the EDITOR into your new repo (the Explorer/title switch to it).
-if command -v code >/dev/null 2>&1; then
-  code -r "/workspaces/$repo" || true
-fi
+# 5. Record that this student now has a work repo, so the welcome banner
+#    switches from "create a project" to "here's your project." postAttachCommand
+#    always runs in the codespace-starter folder, so the banner can't detect the
+#    move by directory — it reads this marker instead.
+echo "$repo" > "$HOME/.student_repo"
 
-# 6. Success banner.
+# 6. Success banner. Opening the repo as the VS Code workspace is what makes the
+#    Source Control panel act on YOUR repo — but Codespaces won't let a script
+#    reliably switch the workspace folder, so the dependable path is the menu.
 cat <<BANNER
 
 ════════════════════════════════════════════════════════════
-   🎉  Created your repo: $repo
+   🎉  Created your repo: $repo   (/workspaces/$repo)
 
-   • Your editor has switched to it (see the Explorer, left).
-   • This terminal has moved into it too.
+   👉 Open it:  File → Open Folder → /workspaces/$repo
+      (the editor may switch on its own; if not, use that menu)
+
+   Then, working inside your repo:
    • Save your work:    commit + push  (Source Control panel, left)
    • Publish a graphic: see .devcontainer/STUDENT_WORKFLOW.md
 ════════════════════════════════════════════════════════════
 
 BANNER
 
-# 7. Move THIS terminal into the repo. A script can't change its parent shell's
-#    working directory, so we replace the script process with a fresh
-#    interactive shell rooted in the repo — that genuinely lands you inside it.
-#    Guarded by the tty test so non-interactive callers (CI, etc.) don't hang.
-cd "/workspaces/$repo"
-if [[ -t 0 && -t 1 ]]; then
-  exec bash
+# 7. Best-effort: ask VS Code to switch to the new repo. Codespaces often
+#    ignores this from a script (the window can snap back to the home repo), so
+#    it's a convenience only — the File → Open Folder step above is the guarantee.
+if command -v code >/dev/null 2>&1; then
+  code -r "/workspaces/$repo" >/dev/null 2>&1 || true
 fi

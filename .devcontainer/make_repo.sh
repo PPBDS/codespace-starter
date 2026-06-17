@@ -49,13 +49,30 @@ else
   gh repo create "$repo" --private --clone
 fi
 
-# 5. Switch VS Code into your new repo. A script runs in a child process, so it
-#    cannot change your *terminal's* directory — but it can move your *editor*,
-#    which is what actually matters in a Codespace. New terminals you open will
-#    then start in your repo.
-echo "✅ Ready: /workspaces/$repo"
+# 5. Move the EDITOR into your new repo (the Explorer/title switch to it).
 if command -v code >/dev/null 2>&1; then
-  code -r "/workspaces/$repo"
-else
-  echo "   Open it with:  File → Open Folder → /workspaces/$repo"
+  code -r "/workspaces/$repo" || true
+fi
+
+# 6. Success banner.
+cat <<BANNER
+
+════════════════════════════════════════════════════════════
+   🎉  Created your repo: $repo
+
+   • Your editor has switched to it (see the Explorer, left).
+   • This terminal has moved into it too.
+   • Save your work:    commit + push  (Source Control panel, left)
+   • Publish a graphic: see .devcontainer/STUDENT_WORKFLOW.md
+════════════════════════════════════════════════════════════
+
+BANNER
+
+# 7. Move THIS terminal into the repo. A script can't change its parent shell's
+#    working directory, so we replace the script process with a fresh
+#    interactive shell rooted in the repo — that genuinely lands you inside it.
+#    Guarded by the tty test so non-interactive callers (CI, etc.) don't hang.
+cd "/workspaces/$repo"
+if [[ -t 0 && -t 1 ]]; then
+  exec bash
 fi

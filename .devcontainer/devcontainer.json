@@ -66,10 +66,10 @@
   // staring at a bare prompt. postAttachCommand runs in a VISIBLE terminal,
   // and since the lifecycle order is postCreate → postStart → postAttach, it
   // fires only after the slow pak install (postCreateCommand) has finished.
-  // So the banner is both actually seen AND a true "ready" signal. The script
-  // also opens STUDENT_WORKFLOW.md once per Codespace. Absolute path via
-  // ${containerWorkspaceFolder} so it still resolves after a student switches
-  // their open folder to their own repo. See welcome.sh for details.
+  // So the banner is both actually seen AND a true "ready" signal. It points
+  // students to STUDENT_WORKFLOW.md but deliberately does NOT auto-open it.
+  // Absolute path via ${containerWorkspaceFolder} so it still resolves after a
+  // student switches their open folder to their own repo. See welcome.sh.
   "postAttachCommand": "bash ${containerWorkspaceFolder}/.devcontainer/welcome.sh",
 
   "customizations": {
@@ -111,10 +111,9 @@
         // "workbench.startupEditor": "none" line here is a confirmed no-op in
         // Codespaces (see microsoft/vscode#134073, #160635, #242243) — it was
         // removed rather than left as dead config that looks like it works.
-        // Revisit if that bug is ever fixed. Workaround (now implemented):
-        // postAttachCommand runs .devcontainer/welcome.sh, which opens
-        // STUDENT_WORKFLOW.md so students land on our content instead of VS
-        // Code's generic Welcome tab.
+        // Revisit if that bug is ever fixed. We don't fight it further: the VS
+        // Code Welcome tab is left as-is, and postAttachCommand prints a ready
+        // banner (welcome.sh) pointing students to .devcontainer/STUDENT_WORKFLOW.md.
 
         // Auto-stage all changes on commit so students don't get a confusing
         // dialog asking whether to stage files.

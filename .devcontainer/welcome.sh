@@ -21,16 +21,9 @@ cat <<BANNER
    Start your own project (creates + opens a new repo):
        bash ${here}/make_repo.sh <repo-name>
 
-   Full guide: .devcontainer/STUDENT_WORKFLOW.md (opening now)
+   Full guide: .devcontainer/STUDENT_WORKFLOW.md
+
+   Type \`clear\` to remove this banner.
 ════════════════════════════════════════════════════════════
 
 BANNER
-
-# Open the guide once per Codespace, so students land on instructions the first
-# time without it reopening every time they resume.
-marker="$HOME/.welcomed"
-guide="$here/STUDENT_WORKFLOW.md"
-if [[ ! -f "$marker" && -f "$guide" ]] && command -v code >/dev/null 2>&1; then
-  code "$guide" || true
-  touch "$marker"
-fi

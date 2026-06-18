@@ -17,13 +17,17 @@ set -uo pipefail
 
 # Disable VS Code Workspace Trust for this Codespace. Without this, a repo a
 # student opens via File → Open Folder starts in Restricted Mode (VS Code hasn't
-# "trusted" that folder), and Restricted Mode IGNORES .vscode/settings.json — so
-# the git.autofetch=false we seed there is dropped and the "run git fetch
-# automatically?" prompt appears. (Same mechanism as Gemini's "untrusted folder"
-# skip.) A Codespace is an isolated, managed container GitHub already auto-trusts,
-# so turning the check off is safe. It's an application-scoped setting, so it must
-# live in VS Code's *user* settings — it can't go in devcontainer/workspace
-# settings (those are ignored for it). Idempotent: only written once.
+# "trusted" that folder): they get a "do you trust the authors?" prompt, and
+# Restricted Mode can suppress settings/features — e.g. the "run git fetch
+# automatically?" prompt reappears. Disabling trust lets the Codespace's
+# Machine-scope settings (arf console, autosave, git.autofetch off, …) apply
+# cleanly to whatever folder the student opens — which is exactly why make_repo
+# no longer needs to seed a per-repo .vscode/settings.json (see its NOTE).
+# (Same mechanism as Gemini's "untrusted folder" skip.) A Codespace is an
+# isolated, managed container GitHub already auto-trusts, so turning the check
+# off is safe. It's an application-scoped setting, so it must live in VS Code's
+# *user* settings — it can't go in devcontainer/workspace settings (those are
+# ignored for it). Idempotent: only written once.
 user_settings="$HOME/.vscode-remote/data/User/settings.json"
 if command -v node >/dev/null 2>&1 && ! grep -qs 'workspace.trust.enabled' "$user_settings"; then
   mkdir -p "$(dirname "$user_settings")"
@@ -67,7 +71,7 @@ else
    ✅  YOUR CODESPACE IS READY
 
    Start your own project (creates a new repo):
-       bash ${here}/make_repo.sh <repo-name>
+       .devcontainer/make_repo.sh <repo-name>
 
    Full guide: ${guide}
 

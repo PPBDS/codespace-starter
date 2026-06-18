@@ -3,7 +3,7 @@
 # make_repo.sh — create your personal work repo from a Codespace launched off
 # codespace-starter.
 #
-#   Usage:  bash .devcontainer/make_repo.sh <repo-name>
+#   Usage:  .devcontainer/make_repo.sh <repo-name>
 #
 # Safe to re-run: skips the login if you're already signed in, and clones your
 # repo instead of recreating it if it already exists from a past session.
@@ -12,7 +12,7 @@ set -euo pipefail
 
 repo="${1:-}"
 if [[ -z "$repo" ]]; then
-  echo "Usage: bash .devcontainer/make_repo.sh <repo-name>" >&2
+  echo "Usage: .devcontainer/make_repo.sh <repo-name>" >&2
   exit 2
 fi
 
@@ -84,19 +84,15 @@ else
   gh repo create "$repo" --public --clone
 fi
 
-# 4b. Give the new repo the launchpad's VS Code settings. The devcontainer
-#     applies those (arf R console, autosave, git.autofetch off, …) at the
-#     Codespace's Machine scope, which a *separately-opened* folder does NOT
-#     inherit — that's why the "run git fetch automatically?" prompt appeared,
-#     and why the R console would otherwise fall back to the default, once you
-#     open your own repo. Copy them in as this repo's own workspace settings,
-#     which are always honored for this folder. Skip if the repo already has
-#     settings (e.g. a returning student's repo, cloned with them committed).
-machine_settings="$HOME/.vscode-remote/data/Machine/settings.json"
-if [[ -f "$machine_settings" && ! -f "/workspaces/$repo/.vscode/settings.json" ]]; then
-  mkdir -p "/workspaces/$repo/.vscode"
-  cp "$machine_settings" "/workspaces/$repo/.vscode/settings.json"
-fi
+# NOTE: we deliberately do NOT seed a .vscode/settings.json into the new repo.
+# The devcontainer's settings (arf R console, autosave, git.autofetch off, …)
+# are applied at the Codespace's *Machine* scope, which DOES carry over to any
+# folder the student opens in this Codespace — verified by launching an R
+# console in a fresh repo with no settings file and seeing /usr/local/bin/arf
+# run. (The earlier "git fetch automatically?" prompt was Restricted Mode, now
+# handled by disabling Workspace Trust in welcome.sh — not a missing copy.) So
+# a seeded file was pure redundancy, and worse: it left a confusing settings
+# file in an otherwise-empty new repo.
 
 # 5. Record that this student now has a work repo, so the welcome banner
 #    switches from "create a project" to "here's your project." postAttachCommand
@@ -104,33 +100,15 @@ fi
 #    move by directory — it reads this marker instead.
 echo "$repo" > "$HOME/.student_repo"
 
-# 6. Success banner. Opening the repo as the VS Code workspace is what makes the
-#    Source Control panel act on YOUR repo — but Codespaces won't let a script
-#    reliably switch the workspace folder, so the dependable path is the menu.
-cat <<BANNER
-
-════════════════════════════════════════════════════════════
-   🎉  Created your repo: $repo   (/workspaces/$repo)
-       This terminal is now INSIDE it — run gemini/claude/quarto here.
-
-   👉 Make the Explorer show it too:  File → Open Folder → /workspaces/$repo
-      (the editor may switch on its own; if not, use that menu)
-
-   Then, working inside your repo:
-   • Save your work:    commit + push  (Source Control panel, left)
-   • Publish a graphic: see .devcontainer/STUDENT_WORKFLOW.md
-════════════════════════════════════════════════════════════
-
-BANNER
-
-# 7. Best-effort: ask VS Code to switch to the new repo. Codespaces often
-#    ignores this from a script (the window can snap back to the home repo), so
-#    it's a convenience only — the File → Open Folder step above is the guarantee.
+# 6. Best-effort: ask VS Code to switch the Explorer to the new repo. Codespaces
+#    often ignores this from a script (the window can snap back to the home
+#    repo), so it's a convenience only — File → Open Folder is the manual
+#    fallback, documented in STUDENT_WORKFLOW.md.
 if command -v code >/dev/null 2>&1; then
   code -r "/workspaces/$repo" >/dev/null 2>&1 || true
 fi
 
-# 8. Put THIS terminal in the repo too. Steps 2b and 7 only fix NEW terminals
+# 7. Put THIS terminal in the repo too. Steps 2b and 6 only fix NEW terminals
 #    and the Explorer; the terminal that ran this script is still sitting in
 #    codespace-starter, so `gemini`/`claude` typed right now would write to the
 #    launcher — invisibly, since the Explorer shows the repo. A script can't cd

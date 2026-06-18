@@ -11,7 +11,7 @@ no setup of its own.
 In the terminal:
 
 ```bash
-bash .devcontainer/make_repo.sh my-class-work
+.devcontainer/make_repo.sh my-class-work
 ```
 
 (Use any name in place of `my-class-work`.) The first time, a browser prompt

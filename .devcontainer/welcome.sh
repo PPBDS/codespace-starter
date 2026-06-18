@@ -23,7 +23,7 @@ set -uo pipefail
 # Machine-scope settings (arf console, autosave, git.autofetch off, …) apply
 # cleanly to whatever folder the student opens — which is exactly why make_repo
 # no longer needs to seed a per-repo .vscode/settings.json (see its NOTE).
-# (Same mechanism as Gemini's "untrusted folder" skip.) A Codespace is an
+# A Codespace is an
 # isolated, managed container GitHub already auto-trusts, so turning the check
 # off is safe. It's an application-scoped setting, so it must live in VS Code's
 # *user* settings — it can't go in devcontainer/workspace settings (those are

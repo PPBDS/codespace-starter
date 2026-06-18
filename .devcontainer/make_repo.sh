@@ -29,8 +29,8 @@ if ! grep -qxF 'unset GITHUB_TOKEN GH_TOKEN' "$HOME/.bashrc" 2>/dev/null; then
 fi
 
 # 2b. Make every NEW terminal open in your work repo, not this launcher. A
-#     terminal that starts in /workspaces/codespace-starter leaves `gemini`,
-#     `claude`, etc. running here, so the files they create land in the
+#     terminal that starts in /workspaces/codespace-starter leaves `claude`,
+#     `codex`, etc. running here, so the files they create land in the
 #     launcher — invisibly, since the Explorer is showing your repo. We append
 #     a guard to ~/.bashrc (runs at each shell start) that cd's into the repo
 #     recorded in ~/.student_repo (written in step 5). Scoped to the launcher
@@ -110,7 +110,7 @@ fi
 
 # 7. Put THIS terminal in the repo too. Steps 2b and 6 only fix NEW terminals
 #    and the Explorer; the terminal that ran this script is still sitting in
-#    codespace-starter, so `gemini`/`claude` typed right now would write to the
+#    codespace-starter, so `claude`/`codex` typed right now would write to the
 #    launcher — invisibly, since the Explorer shows the repo. A script can't cd
 #    its parent shell, so we replace this shell with a fresh one rooted in the
 #    repo. Only when attached to a terminal (skip in non-interactive/CI runs).

@@ -76,7 +76,18 @@
   "customizations": {
     "vscode": {
 
-      // Extensions students actually need
+      // Extensions students actually need.
+      //
+      // DELIBERATELY ABSENT: the AI assistant *extensions* (anthropic.claude-code,
+      // openai.chatgpt). The AI tools ship as CLIs in the image (claude, gemini,
+      // codex, aider) and that is intentional — do NOT add the extension panels
+      // here. Tested 2026-06: the in-editor panels are webviews that render
+      // broken in the browser-based Codespaces client (garbled/overlapping UI),
+      // and there is no reliable desktop fallback for a big slice of students —
+      // VS Code Desktop does not exist for iPad or ChromeOS, and drops Windows
+      // 7/8. The integrated terminal (and thus the CLIs) renders fine on every
+      // device, so CLIs are the device-agnostic answer. (Same Codespaces-remote
+      // webview class of failure that got the Gemini companion extension dropped.)
       "extensions": [
         "reditorsupport.r",
         "quarto.quarto",

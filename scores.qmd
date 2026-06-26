@@ -1,0 +1,32 @@
+---
+title: "Scores"
+format: html
+---
+
+This report creates an interactive scorigami plot using Plotly so you can hover over score pairs.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(plotly)
+
+games <- read_csv("Games.csv")
+
+score_pairs <- games %>%
+  count(homeScore, awayScore, name = "count")
+
+plot_ly(
+  data = score_pairs,
+  x = ~homeScore,
+  y = ~awayScore,
+  z = ~count,
+  type = "heatmap",
+  colors = viridisLite::magma(256),
+  hovertemplate = "Home: %{x}<br>Away: %{y}<br>Games: %{z}<extra></extra>"
+) %>%
+  layout(
+    title = "Interactive Scorigami Plot",
+    xaxis = list(title = "Home Score"),
+    yaxis = list(title = "Away Score")
+  ) %>%
+  config(displayModeBar = FALSE)
+```

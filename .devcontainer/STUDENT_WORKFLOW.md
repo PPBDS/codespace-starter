@@ -73,6 +73,10 @@ https://raw.githubusercontent.com/<your-username>/<your-repo>/main/plot.png
 - **Coming back later:** reopen the *same* Codespace and everything is still
   there. If you start a **fresh** Codespace, just run `connect-repo my-class-work`
   again — it notices your repo already exists and clones it instead of erroring.
+- **Connecting to someone else's repo** (an org or another user — e.g. an
+  assignment repo): pass `owner/name`, like
+  `.devcontainer/connect-repo.sh PPBDS/some-assignment`. It clones into
+  `/workspaces/some-assignment`. (You need read access to a private one.)
 - **If `git push` ever says "Author identity unknown":**
   ```bash
   git config --global user.name "Your Name"

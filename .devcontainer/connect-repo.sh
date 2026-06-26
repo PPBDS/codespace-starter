@@ -39,11 +39,12 @@ use these commands all term, so it's worth understanding them.
      Stores your token so pushes — from the terminal AND the VS Code Source
      Control panel — go out as you, not as the built-in Codespace token.
 
-  4. CREATE A NEW REPO, OR CONNECT TO ONE YOU ALREADY HAVE
-     New repo (doesn't exist yet on your account):
+  4. CREATE A NEW REPO, OR CONNECT TO ONE THAT EXISTS
+     New repo on your account (doesn't exist yet):
          gh repo create <name> --public --clone
-     Existing repo (already on your account):
-         gh repo clone <name>
+     Existing repo — yours, or an org's / someone else's via owner/<name>:
+         gh repo clone <name>          # your own
+         gh repo clone owner/<name>    # an org / another user (needs read access)
      Either way you end up with the repo at /workspaces/<name>.
 
 After that, you work in /workspaces/<name> and save with the normal git cycle:
@@ -63,7 +64,20 @@ fi
 repo="${1:-}"
 if [[ -z "$repo" ]]; then
   echo "Usage: .devcontainer/connect-repo.sh <repo-name>" >&2
+  echo "       .devcontainer/connect-repo.sh owner/<repo-name>  (connect to an org/other repo)" >&2
   echo "       .devcontainer/connect-repo.sh --help   (explains the git commands it runs)" >&2
+  exit 2
+fi
+
+# Split the argument into the REMOTE ref gh resolves and the LOCAL folder name.
+# For a bare "name" they're identical (the original behavior). For "owner/name"
+# we clone the remote owner/name but keep the local folder a plain basename, so
+# everything below — the marker, the auto-cd guard (step 2b), `cd` — stays
+# slash-free and unchanged.
+remote="$repo"          # <name>  OR  owner/<name>
+dir="${repo##*/}"       # basename only
+if [[ -z "$dir" || "$dir" == "." || "$dir" == ".." ]]; then
+  echo "Invalid repo name: '$repo'" >&2
   exit 2
 fi
 
@@ -124,13 +138,19 @@ git config --global --add         credential.helper store
 printf 'https://x-access-token:%s@github.com\n' "$token" > "$HOME/.git-credentials"
 chmod 600 "$HOME/.git-credentials"
 
-# 4. Create the repo — or clone it if it already exists from a past session.
+# 4. Create the repo — or clone it if it already exists (yours, an org's, or a
+#    past session's). Clone the REMOTE ref into the basename DIR.
 cd /workspaces
-if [[ -d "$repo/.git" ]]; then
-  echo "→ /workspaces/$repo is already here."
-elif gh repo view "$repo" >/dev/null 2>&1; then
-  echo "→ '$repo' already exists on GitHub — cloning it."
-  gh repo clone "$repo" "$repo"
+if [[ -d "$dir/.git" ]]; then
+  echo "→ /workspaces/$dir is already here."
+elif gh repo view "$remote" >/dev/null 2>&1; then
+  echo "→ '$remote' already exists on GitHub — cloning it."
+  gh repo clone "$remote" "$dir"
+elif [[ "$repo" == */* ]]; then
+  # owner/name that doesn't exist: don't try to create in someone else's
+  # namespace (it would just fail with a confusing permission error).
+  echo "→ '$remote' not found, and we won't create a repo under '${repo%%/*}'." >&2
+  exit 1
 else
   gh repo create "$repo" --public --clone
 fi
@@ -149,14 +169,14 @@ fi
 #    switches from "create a project" to "here's your project." postAttachCommand
 #    always runs in the codespace-starter folder, so the banner can't detect the
 #    move by directory — it reads this marker instead.
-echo "$repo" > "$HOME/.student_repo"
+echo "$dir" > "$HOME/.student_repo"
 
 # 6. Best-effort: ask VS Code to switch the Explorer to the new repo. Codespaces
 #    often ignores this from a script (the window can snap back to the home
 #    repo), so it's a convenience only — File → Open Folder is the manual
 #    fallback, documented in STUDENT_WORKFLOW.md.
 if command -v code >/dev/null 2>&1; then
-  code -r "/workspaces/$repo" >/dev/null 2>&1 || true
+  code -r "/workspaces/$dir" >/dev/null 2>&1 || true
 fi
 
 # 7. Put THIS terminal in the repo too. Steps 2b and 6 only fix NEW terminals
@@ -167,21 +187,6 @@ fi
 #    repo. Only when attached to a terminal (skip in non-interactive/CI runs).
 #    Must be LAST: exec never returns. `exit` later drops back to the launcher.
 if [[ -t 1 ]]; then
-  cd "/workspaces/$repo"
+  cd "/workspaces/$dir"
   exec bash
 fi
-
-# ─────────────────────────────────────────────────────────────────────────────
-# TODO — revisit mid-July 2026
-#
-# Connecting to an *existing* repo currently only works for a BARE name under
-# YOUR OWN account: `gh` resolves `<name>` to `<your-username>/<name>` (see the
-# create-or-clone block, step 4). Passing `owner/repo` is NOT supported — the
-# slash would (a) clone into a nested /workspaces/owner/repo path, and (b) trip
-# the step-2b auto-cd guard, which deliberately rejects names containing "/".
-#
-# If we decide students need to connect to an ORG repo or someone else's repo,
-# teach this script to accept `owner/repo`: clone into just the basename,
-# record the basename in ~/.student_repo, and keep the auto-cd guard happy.
-# Open question to settle first: is that a workflow the course actually needs?
-# ─────────────────────────────────────────────────────────────────────────────

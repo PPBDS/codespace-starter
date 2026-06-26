@@ -122,7 +122,11 @@ fi
 #    step is clicking Authorize in the browser (GitHub's security boundary).
 if ! gh auth status >/dev/null 2>&1; then
   echo "→ Sign in to GitHub: authorize in the browser/code prompt, then come back here."
-  gh auth login --hostname github.com --git-protocol https --web
+  # NODE_NO_WARNINGS=1: when gh opens the device-login URL it runs the
+  # Codespaces browser-opener (Node), which prints a scary-looking
+  # `url.parse()` DeprecationWarning. That's upstream noise, not a problem
+  # here — suppress it so students aren't alarmed mid-sign-in.
+  NODE_NO_WARNINGS=1 gh auth login --hostname github.com --git-protocol https --web
 fi
 
 # 3b. Make `git push` authenticate as YOU — from BOTH the terminal AND the VS

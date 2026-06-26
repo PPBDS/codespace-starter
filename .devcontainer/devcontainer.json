@@ -16,7 +16,7 @@
   // Bakes in: gh, quarto, arf (Rust R console), httpgd, pak,
   // tutorial.helpers, vscode.tutorials, a basic Python data-science stack
   // (numpy/pandas/matplotlib/seaborn/scikit-learn/statsmodels/jupyter in a venv
-  // at /opt/venv, also R's reticulate Python), interactive-viz + Shinylive
+  // at /opt/venv, the default `python`), interactive-viz + Shinylive
   // packages (R plotly/leaflet/DT/crosstalk + Python plotly/altair/folium/
   // itables; shiny+shinylive compile to WebAssembly for static hosting),
   // Observable (Quarto renders {ojs} cells out of the box; the `observable`

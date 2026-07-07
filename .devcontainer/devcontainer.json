@@ -9,7 +9,7 @@
   // repo is just data, opened as a folder inside the same Codespace; it needs
   // no prebuild of its own.
 
-  // The PPBDS image, pinned to v1.0.0. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.0.1. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -48,7 +48,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.0.0",
+  "image": "ghcr.io/ppbds/devcontainer:1.0.1",
 
   // Refresh the fast-moving PPBDS course packages to the latest commit on
   // each one's default branch, every time a Codespace is created. The
@@ -75,7 +75,7 @@
   // repo ASAP — that fixes all subsequent creates immediately, with no
   // image rebuild or pin bump needed. (If this ever bites too often, switch
   // to pinning a tested release tag here and bumping it deliberately.)
-  "postCreateCommand": "R -q -e 'pak::pkg_install(c(\"PPBDS/tutorial.helpers\", \"PPBDS/vscode.tutorials\", \"PPBDS/misc.tutorials\", \"PPBDS/primer/primer.tutorials\"), ask = FALSE)'",
+  "postCreateCommand": "R -q -e 'pak::pkg_install(c(\"PPBDS/tutorial.helpers\", \"PPBDS/vscode.tutorials\", \"PPBDS/misc.tutorials\", \"PPBDS/primer.tutorials\"), ask = FALSE)'",
 
   // "Setup complete" signal + onboarding, via postAttachCommand — NOT
   // postStartCommand. This distinction is the whole point: in Codespaces,

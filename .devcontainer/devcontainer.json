@@ -9,7 +9,7 @@
   // repo is just data, opened as a folder inside the same Codespace; it needs
   // no prebuild of its own.
 
-  // PPBDS student image, pinned to v0.7.0. Bumping is a deliberate
+  // PPBDS student image, pinned to v0.9.0. Bumping is a deliberate
   // edit to this line — never use `:latest` in student-facing config,
   // since it would float silently with every push to PPBDS/devcontainers.
   //
@@ -17,9 +17,13 @@
   // tutorial.helpers, vscode.tutorials, misc.tutorials, primer.tutorials,
   // a modeling stack (tidymodels + xgboost/lightgbm/catboost/randomForest/
   // ranger/glmnet engines + brms for Bayesian/Stan),
-  // a mapping/census stack (sf + tidycensus/tigris for census-tract maps;
-  // leaflet draws sf objects over free CARTO tiles, no Mapbox token — live
-  // tidycensus queries need each student's free Census API key),
+  // a mapping/census stack (sf + tidycensus/tigris for census-tract maps,
+  // plus the Kyle Walker toolkit: mapgl for token-free WebGL vector maps via
+  // maplibre() + CARTO styles, crsuggest for CRS picks, idbr for
+  // international Census data — live tidycensus/idbr queries need each
+  // student's free Census API key),
+  // an inference-reporting/presentation set used throughout the primer book
+  // and tutorials (gt tables, marginaleffects, patchwork, easystats),
   // a basic Python data-science stack
   // (numpy/pandas/matplotlib/seaborn/scikit-learn/statsmodels/jupyter in a venv
   // at /opt/venv, the default `python`), interactive-viz + Shinylive
@@ -40,7 +44,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainers/student:0.7.0",
+  "image": "ghcr.io/ppbds/devcontainers/student:0.9.0",
 
   // Refresh the fast-moving PPBDS course packages to the latest commit on
   // each one's default branch, every time a Codespace is created. The

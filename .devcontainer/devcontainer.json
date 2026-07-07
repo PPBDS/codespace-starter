@@ -9,9 +9,13 @@
   // repo is just data, opened as a folder inside the same Codespace; it needs
   // no prebuild of its own.
 
-  // PPBDS student image, pinned to v0.9.0. Bumping is a deliberate
-  // edit to this line — never use `:latest` in student-facing config,
-  // since it would float silently with every push to PPBDS/devcontainers.
+  // The PPBDS image, pinned to v1.0.0. Since v1.0.0 there is ONE image for
+  // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
+  // devcontainers/base + /dev + /student trio, and additionally bakes the
+  // package-development tooling: devtools, pkgdown, roxygen2, testthat,
+  // usethis, qpdf). Bumping is a deliberate edit to this line — never use
+  // `:latest` in student-facing config, since it would float silently with
+  // every push to PPBDS/devcontainers.
   //
   // Bakes in: gh, quarto, arf (Rust R console), httpgd, pak,
   // tutorial.helpers, vscode.tutorials, misc.tutorials, primer.tutorials,
@@ -44,11 +48,11 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainers/student:0.9.0",
+  "image": "ghcr.io/ppbds/devcontainer:1.0.0",
 
   // Refresh the fast-moving PPBDS course packages to the latest commit on
   // each one's default branch, every time a Codespace is created. The
-  // image (see student/Dockerfile in PPBDS/devcontainers) BAKES these too,
+  // image (see the Dockerfile in PPBDS/devcontainers) BAKES these too,
   // which (1) pre-installs all transitive deps so this is a quick single-
   // package refresh, not a cold build, and (2) leaves a working fallback
   // version if GitHub is unreachable here — a failed postCreateCommand
@@ -61,7 +65,7 @@
   //
   // No upgrade = TRUE: deps are already baked at known-good versions, so
   // this refreshes only the named packages and avoids re-churning the
-  // learnr/knitr/xfun chain (see the xfun ABI note in student/Dockerfile).
+  // learnr/knitr/xfun chain (see the xfun ABI note in the devcontainers Dockerfile).
   //
   // ACCEPTED RISK — blast radius: tracking GitHub HEAD means a bad commit
   // to either package breaks EVERY new Codespace at once, with no pinned
@@ -148,11 +152,11 @@
         // text-shaping, …); pak builds against those. With this off pak still
         // PRINTS any sysreq it believes is missing but does not install it.
         // NOTE: this is primarily set GLOBALLY in the student image itself
-        // (ENV PKG_SYSREQS=false in student/Dockerfile), which already covers
+        // (ENV PKG_SYSREQS=false in the devcontainers Dockerfile), which already covers
         // the build, postCreate, and runtime terminals. It is repeated here as
         // a terminal-scoped belt-and-suspenders. (Separately, the V8 "missing
         // libnode-dev" false positive is handled in the image via a metadata
-        // libnode-dev-virtual package — see base/Dockerfile.)
+        // libnode-dev-virtual package — see the devcontainers Dockerfile.)
         "terminal.integrated.env.linux": {
           "GITHUB_TOKEN": "",
           "GH_TOKEN": "",
@@ -161,10 +165,10 @@
 
         // Use arf (Rust-based R console) instead of the default R terminal.
         // Point at the stable /usr/local/bin/arf symlink the base image
-        // provides for exactly this purpose (see base/Dockerfile in
+        // provides for exactly this purpose (see the Dockerfile in
         // PPBDS/devcontainers), NOT the real /home/rstudio/.cargo/bin/arf
         // path — that way a change to the image's default user only touches
-        // base/Dockerfile, not this consumer setting.
+        // that Dockerfile, not this consumer setting.
         "r.rterm.linux": "/usr/local/bin/arf",
 
         // Required for arf-style consoles to handle pasted code correctly.

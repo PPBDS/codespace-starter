@@ -159,6 +159,29 @@ else
   gh repo create "$remote" --public --clone
 fi
 
+# 4b. Seed the AI-assistant guidance into the repo (if not already there).
+#     AGENTS.md is the cross-tool instruction file (Copilot, Antigravity,
+#     Codex, Aider read it natively; Copilot needs chat.useAgentsMdFile, set
+#     in devcontainer.json); CLAUDE.md is a symlink for Claude Code; the
+#     .github pointer covers Copilot surfaces that predate AGENTS.md support.
+#     These files must live at the root of the STUDENT'S repo — AI tools read
+#     instruction files from the folder they run in, and the auto-cd above
+#     ensures that's this repo, not the launcher. Seeded only when absent, so
+#     a repo that already carries (possibly instructor-updated or
+#     student-edited) guidance is left alone. The canonical copy lives at the
+#     root of codespace-starter; edit it THERE.
+starter_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ ! -e "/workspaces/$dir/AGENTS.md" && -f "$starter_root/AGENTS.md" ]]; then
+  cp "$starter_root/AGENTS.md" "/workspaces/$dir/AGENTS.md"
+  [[ -e "/workspaces/$dir/CLAUDE.md" ]] || ln -s AGENTS.md "/workspaces/$dir/CLAUDE.md"
+  if [[ ! -e "/workspaces/$dir/.github/copilot-instructions.md" ]]; then
+    mkdir -p "/workspaces/$dir/.github"
+    printf 'Follow the instructions in [AGENTS.md](../AGENTS.md) at the repository root.\n' \
+      > "/workspaces/$dir/.github/copilot-instructions.md"
+  fi
+  echo "→ Added AGENTS.md (guidance for AI assistants) — it will ride along with your first commit."
+fi
+
 # NOTE: we deliberately do NOT seed a .vscode/settings.json into the new repo.
 # The devcontainer's settings (arf R console, autosave, git.autofetch off, …)
 # are applied at the Codespace's *Machine* scope, which DOES carry over to any

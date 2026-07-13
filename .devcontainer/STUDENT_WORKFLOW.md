@@ -111,5 +111,9 @@ interactive pieces run in the browser, so you never need a server.
 - **AI assistants in the terminal** — `claude`, `codex`, `agy`, `aider`. Sign in
   (or set an API key) and ask for coding help. (They're terminal tools by
   design — they work on every device, even a tablet.)
+- **AGENTS.md** — a file in your repo that tells every AI assistant (including
+  GitHub Copilot) how to work with you in this course: short answers, guidance
+  instead of finished solutions. It's there so the AI helps you *learn* —
+  please leave it in place.
 - **`connect-repo.sh`** — create or connect to your work repo (run `--help` to
   see exactly what it does).

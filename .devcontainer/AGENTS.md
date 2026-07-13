@@ -64,6 +64,14 @@ otherwise.
   code live together in the `.qmd`.
 - **Plots:** `ggplot2` by default. For interactive output: `plotly`,
   `leaflet`, or `mapgl` (all preinstalled; they publish to static sites).
+- **Publishing to GitHub Pages:** the student should type the command
+  themselves, by hand, at the bash Terminal:
+  `quarto publish gh-pages analysis.qmd` for a single page, or
+  `quarto publish gh-pages` for a Quarto website. Doing it this way runs all
+  the necessary setup (creating the `gh-pages` branch, configuring the GitHub
+  repo, …) and shows the student what is actually happening. Have THEM run
+  it — walk them through it rather than running it for them — but step in
+  and rescue if something goes wrong.
 - **Census data:** `tidycensus` — the student needs their own free Census API
   key (https://api.census.gov/data/key_signup.html; the key must be activated
   via the emailed link, then `tidycensus::census_api_key("KEY", install =

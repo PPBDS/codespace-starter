@@ -4,12 +4,26 @@
 # Codespace launched off codespace-starter. If a repo by the given name already
 # exists on your GitHub account, it's cloned; otherwise it's created.
 #
-#   Usage:  .devcontainer/connect-repo.sh <repo-name>
+#   Usage:  .devcontainer/connect-repo.sh [--no-agents] <repo-name>
+#
+# By default the new repo gets a copy of AGENTS.md (guidance that tells AI
+# assistants to tutor rather than solve); --no-agents skips that.
 #
 # Safe to re-run: skips the login if you're already signed in, and clones your
 # repo instead of recreating it if it already exists from a past session.
 #
 set -euo pipefail
+
+# Split out the --no-agents flag (position-independent) from the repo name.
+no_agents=false
+positional=()
+for arg in "$@"; do
+  case "$arg" in
+    --no-agents) no_agents=true ;;
+    *)           positional+=("$arg") ;;
+  esac
+done
+set -- ${positional+"${positional[@]}"}
 
 # --help / -h: explain (without running) the git/GitHub commands this script
 # issues, so you can learn what's happening and do it by hand. Kept before any
@@ -47,6 +61,12 @@ use these commands all term, so it's worth understanding them.
          gh repo clone owner/<name>    # an org / another user (needs read access)
      Either way you end up with the repo at /workspaces/<name>.
 
+  5. ADD AI-ASSISTANT GUIDANCE (default; skip with --no-agents)
+     Copies AGENTS.md into your new repo. It tells AI assistants (GitHub
+     Copilot, Antigravity, and friends) to act as a tutor for this course:
+     short answers, guidance instead of finished solutions. Pass --no-agents
+     if you'd rather work without it.
+
 After that, you work in /workspaces/<name> and save with the normal git cycle:
          git add -A
          git commit -m "describe what you changed"
@@ -56,14 +76,14 @@ The script also drops your terminal into the new folder and smooths a couple of
 Codespace quirks, but steps 1–4 above are the whole GitHub story. Run them by
 hand any time you'd rather not use the script.
 
-  Usage:  .devcontainer/connect-repo.sh <repo-name>
+  Usage:  .devcontainer/connect-repo.sh [--no-agents] <repo-name>
 HELP
   exit 0
 fi
 
 repo="${1:-}"
 if [[ -z "$repo" ]]; then
-  echo "Usage: .devcontainer/connect-repo.sh <repo-name>" >&2
+  echo "Usage: .devcontainer/connect-repo.sh [--no-agents] <repo-name>" >&2
   echo "       .devcontainer/connect-repo.sh owner/<repo-name>  (connect to an org/other repo)" >&2
   echo "       .devcontainer/connect-repo.sh --help   (explains the git commands it runs)" >&2
   exit 2
@@ -157,6 +177,23 @@ elif [[ "$repo" == */* ]]; then
   exit 1
 else
   gh repo create "$remote" --public --clone
+fi
+
+# 4b. Copy the AI-assistant guidance into the repo (default; --no-agents
+#     skips). AGENTS.md tells the AI tools students use (GitHub Copilot via
+#     the chat.useAgentsMdFile setting in devcontainer.json, Antigravity and
+#     other CLIs natively) to tutor rather than solve. It must sit at the
+#     root of the STUDENT'S repo — AI tools read instruction files from the
+#     folder they run in, and the auto-cd above makes that this repo, not the
+#     launcher. Only copied when absent, so an instructor-updated or
+#     student-edited copy is never clobbered. The canonical version lives at
+#     .devcontainer/AGENTS.md in codespace-starter; edit it THERE.
+if ! $no_agents && [[ ! -e "/workspaces/$dir/AGENTS.md" ]]; then
+  here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [[ -f "$here/AGENTS.md" ]]; then
+    cp "$here/AGENTS.md" "/workspaces/$dir/AGENTS.md"
+    echo "→ Added AGENTS.md (AI assistants will tutor, not solve). Re-run with --no-agents to skip."
+  fi
 fi
 
 # NOTE: we deliberately do NOT seed a .vscode/settings.json into the new repo.

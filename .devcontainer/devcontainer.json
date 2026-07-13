@@ -121,6 +121,13 @@
 
       "settings": {
 
+        // Make Copilot Chat read AGENTS.md from the workspace root. Inert in
+        // this launcher (which deliberately has no AGENTS.md); it matters in
+        // the student's own repo, where connect-repo.sh places one by default
+        // (skippable via --no-agents). Set explicitly because some VS Code
+        // versions ship it off. Canonical file: .devcontainer/AGENTS.md.
+        "chat.useAgentsMdFile": true,
+
         // Point the Python extension at the baked data-science venv so
         // notebooks and scripts use the right interpreter out of the box
         // (numpy/pandas/etc. importable, the "Python (data science)" kernel).

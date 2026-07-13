@@ -14,6 +14,13 @@
 #
 set -euo pipefail
 
+# Resolve this script's directory NOW, before anything cd's elsewhere. The
+# script is normally invoked by a RELATIVE path (.devcontainer/connect-repo.sh)
+# and later cd's to /workspaces — after that, a relative BASH_SOURCE no longer
+# resolves. (This bit a student: step 4b died with "cd: .devcontainer: No such
+# file or directory", and set -e then killed every remaining step.)
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Split out the --no-agents flag (position-independent) from the repo name.
 no_agents=false
 positional=()
@@ -189,9 +196,8 @@ fi
 #     student-edited copy is never clobbered. The canonical version lives at
 #     .devcontainer/AGENTS.md in codespace-starter; edit it THERE.
 if ! $no_agents && [[ ! -e "/workspaces/$dir/AGENTS.md" ]]; then
-  here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  if [[ -f "$here/AGENTS.md" ]]; then
-    cp "$here/AGENTS.md" "/workspaces/$dir/AGENTS.md"
+  if [[ -f "$script_dir/AGENTS.md" ]]; then
+    cp "$script_dir/AGENTS.md" "/workspaces/$dir/AGENTS.md"
     echo "→ Added AGENTS.md (how AI assistants work with you in this course). Re-run with --no-agents to skip."
   fi
 fi

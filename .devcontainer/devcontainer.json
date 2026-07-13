@@ -121,6 +121,14 @@
 
       "settings": {
 
+        // Make Copilot Chat read AGENTS.md from the workspace root — the
+        // cross-tool AI guidance file (see AGENTS.md at this repo's root;
+        // connect-repo.sh seeds it into each student repo). The CLI
+        // assistants (claude, codex, agy, aider) read it natively; Copilot
+        // gates it behind this setting, which has been off-by-default in
+        // some VS Code versions.
+        "chat.useAgentsMdFile": true,
+
         // Point the Python extension at the baked data-science venv so
         // notebooks and scripts use the right interpreter out of the box
         // (numpy/pandas/etc. importable, the "Python (data science)" kernel).

@@ -113,7 +113,7 @@ interactive pieces run in the browser, so you never need a server.
   design — they work on every device, even a tablet.)
 - **AGENTS.md** — `connect-repo` puts this file in your repo (skip it with
   `connect-repo.sh --no-agents <name>`). It tells AI assistants — including
-  GitHub Copilot — to work with you like a tutor: short answers, guidance
-  instead of finished solutions. It's there so the AI helps you *learn*.
+  GitHub Copilot — how to work with you in this course: short, narrated
+  steps and brief answers, so you can follow what's happening.
 - **`connect-repo.sh`** — create or connect to your work repo (run `--help` to
   see exactly what it does).

@@ -6,8 +6,8 @@
 #
 #   Usage:  .devcontainer/connect-repo.sh [--no-agents] <repo-name>
 #
-# By default the new repo gets a copy of AGENTS.md (guidance that tells AI
-# assistants to tutor rather than solve); --no-agents skips that.
+# By default the new repo gets a copy of AGENTS.md (guidance on how AI
+# assistants should work with students in this course); --no-agents skips it.
 #
 # Safe to re-run: skips the login if you're already signed in, and clones your
 # repo instead of recreating it if it already exists from a past session.
@@ -63,9 +63,9 @@ use these commands all term, so it's worth understanding them.
 
   5. ADD AI-ASSISTANT GUIDANCE (default; skip with --no-agents)
      Copies AGENTS.md into your new repo. It tells AI assistants (GitHub
-     Copilot, Antigravity, and friends) to act as a tutor for this course:
-     short answers, guidance instead of finished solutions. Pass --no-agents
-     if you'd rather work without it.
+     Copilot, Antigravity, and friends) how to work with you in this course:
+     short, narrated steps and brief answers. Pass --no-agents if you'd
+     rather work without it.
 
 After that, you work in /workspaces/<name> and save with the normal git cycle:
          git add -A
@@ -192,7 +192,7 @@ if ! $no_agents && [[ ! -e "/workspaces/$dir/AGENTS.md" ]]; then
   here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   if [[ -f "$here/AGENTS.md" ]]; then
     cp "$here/AGENTS.md" "/workspaces/$dir/AGENTS.md"
-    echo "→ Added AGENTS.md (AI assistants will tutor, not solve). Re-run with --no-agents to skip."
+    echo "→ Added AGENTS.md (how AI assistants work with you in this course). Re-run with --no-agents to skip."
   fi
 fi
 

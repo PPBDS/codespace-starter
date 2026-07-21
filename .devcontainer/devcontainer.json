@@ -9,13 +9,21 @@
   // repo is just data, opened as a folder inside the same Codespace; it needs
   // no prebuild of its own.
 
-  // The PPBDS image, pinned to v1.0.2. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.0.3. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
   // usethis, qpdf). Bumping is a deliberate edit to this line — never use
   // `:latest` in student-facing config, since it would float silently with
   // every push to PPBDS/devcontainers.
+  //
+  // WHEN BUMPING THIS PIN, bump it everywhere: the same tag is pinned in the
+  // CI of the tutorial package repos, where a "student-env-render" job
+  // renders every tutorial inside this exact image to prove it works for
+  // students. Currently: primer.tutorials (.github/workflows/R-CMD-check.yaml);
+  // misc.tutorials and vscode.tutorials will join as they adopt the job.
+  // Also PPBDS/primer's .devcontainer pins this image. If those pins lag,
+  // their CI validates against an image students no longer run.
   //
   // Bakes in: gh, quarto, arf (Rust R console), httpgd, pak,
   // tutorial.helpers, vscode.tutorials, misc.tutorials, primer.tutorials,
@@ -48,7 +56,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.0.2",
+  "image": "ghcr.io/ppbds/devcontainer:1.0.3",
 
   // Refresh ONLY primer.tutorials to the latest commit on its default
   // branch, every time a Codespace is created — course content there can

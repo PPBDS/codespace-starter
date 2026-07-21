@@ -20,8 +20,8 @@
   // WHEN BUMPING THIS PIN, bump it everywhere: the same tag is pinned in the
   // CI of the tutorial package repos, where a "student-env-render" job
   // renders every tutorial inside this exact image to prove it works for
-  // students. Currently: primer.tutorials (.github/workflows/R-CMD-check.yaml);
-  // misc.tutorials and vscode.tutorials will join as they adopt the job.
+  // students. Currently: primer.tutorials, misc.tutorials, and
+  // vscode.tutorials (each in .github/workflows/R-CMD-check.yaml).
   // Also PPBDS/primer's .devcontainer pins this image. If those pins lag,
   // their CI validates against an image students no longer run.
   //

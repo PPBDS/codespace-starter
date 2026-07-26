@@ -117,10 +117,14 @@
       // 7/8. The integrated terminal (and thus the CLIs) renders fine on every
       // device, so CLIs are the device-agnostic answer. (Same Codespaces-remote
       // webview class of failure that got the Gemini companion extension dropped.)
+      // NOTE — PPBDS.vscode-r-tutorials is deliberately NOT in this list.
+      // We publish it to Open VSX, and this list can only install from the
+      // Microsoft Marketplace (whose copy is stale). welcome.sh installs the
+      // pinned .vsix from Open VSX at attach time instead — bump RT_VERSION
+      // there to ship a new version.
       "extensions": [
         "reditorsupport.r",
         "quarto.quarto",
-        "PPBDS.vscode-r-tutorials",
         "ritwickdey.LiveServer",
         "tomoki1207.pdf",
         "mechatroner.rainbow-csv",

@@ -9,7 +9,7 @@
   // repo is just data, opened as a folder inside the same Codespace; it needs
   // no prebuild of its own.
 
-  // The PPBDS image, pinned to v1.0.3. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.0.4. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -56,7 +56,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.0.3",
+  "image": "ghcr.io/ppbds/devcontainer:1.0.4",
 
   // Refresh ONLY primer.tutorials to the latest commit on its default
   // branch, every time a Codespace is created — course content there can
@@ -119,9 +119,12 @@
       // webview class of failure that got the Gemini companion extension dropped.)
       // NOTE — PPBDS.vscode-r-tutorials is deliberately NOT in this list.
       // We publish it to Open VSX, and this list can only install from the
-      // Microsoft Marketplace (whose copy is stale). welcome.sh installs the
-      // pinned .vsix from Open VSX at attach time instead — bump RT_VERSION
-      // there to ship a new version.
+      // Microsoft Marketplace (whose copy is stale). The extension is baked
+      // into the image instead (RT_EXT_VERSION build arg in the
+      // PPBDS/devcontainers Dockerfile), pre-extracted from the Open VSX
+      // .vsix so its Activity Bar icon exists from first window paint — an
+      // attach-time install needed a window reload. Ship a new version by
+      // bumping RT_EXT_VERSION there and cutting an image release.
       "extensions": [
         "reditorsupport.r",
         "quarto.quarto",

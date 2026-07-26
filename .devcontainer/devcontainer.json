@@ -58,45 +58,46 @@
   // not a bug. The built-in token is read-mostly outside the home repo.
   "image": "ghcr.io/ppbds/devcontainer:1.0.4",
 
-  // Refresh ONLY primer.tutorials to the latest commit on its default
-  // branch, every time a Codespace is created — course content there can
-  // change at the last minute. The OTHER course packages
-  // (tutorial.helpers, vscode.tutorials, misc.tutorials) are NOT refreshed
-  // (decided 2026-07): whatever versions the image baked are accepted, and
-  // updates to them reach students via the next image release + pin bump.
-  // The image bakes primer.tutorials too, which (1) pre-installs its whole
-  // dependency tree so this refresh is a quick single-package update, not a
-  // cold build, and (2) leaves a working fallback version if GitHub is
-  // unreachable here — a failed postCreateCommand doesn't block the
-  // Codespace from opening.
+  // NO postCreateCommand right now — RETIRED 2026-07-30. All course
+  // packages, including primer.tutorials, ship at whatever versions the
+  // image baked; the live at-create refresh of primer.tutorials was removed
+  // because the baked version is recent enough, making creates faster and
+  // GitHub-independent.
   //
-  // This MUST be postCreateCommand, not onCreate/updateContentCommand:
-  // those run at prebuild time and would re-freeze "latest" at the
-  // prebuild, recreating the manual-update problem this solves. postCreate
-  // runs live when each Codespace is created, even from a prebuild.
+  // The discussion below is KEPT ON PURPOSE: it is the recipe if course
+  // content ever again needs to move faster than image releases. To revive,
+  // restore this line here:
   //
-  // No upgrade = TRUE: deps are already baked at known-good versions, so
-  // this refreshes only the named package and avoids re-churning the
-  // learnr/knitr/xfun chain (see the xfun ABI note in the devcontainers Dockerfile).
+  //   "postCreateCommand": "R -q -e 'pak::pkg_install(\"PPBDS/primer.tutorials\", ask = FALSE)'",
   //
-  // ACCEPTED RISK — blast radius: tracking GitHub HEAD means a bad commit
-  // to primer.tutorials breaks EVERY new Codespace at once, with no pinned
-  // image to shield us. We accept this in exchange for fast course-content
-  // delivery. The mitigation is operational, not config: if new Codespaces
-  // start failing, revert the offending commit in PPBDS/primer.tutorials
-  // ASAP — that fixes all subsequent creates immediately, with no image
-  // rebuild or pin bump needed. (If this ever bites too often, switch to
-  // pinning a tested release tag here and bumping it deliberately.)
-  "postCreateCommand": "R -q -e 'pak::pkg_install(\"PPBDS/primer.tutorials\", ask = FALSE)'",
+  // and re-read the following before doing so:
+  //
+  // - It MUST be postCreateCommand, not onCreate/updateContentCommand:
+  //   those run at prebuild time and would re-freeze "latest" at the
+  //   prebuild, recreating the manual-update problem this solves. postCreate
+  //   runs live when each Codespace is created, even from a prebuild. A
+  //   failed postCreateCommand doesn't block the Codespace from opening, and
+  //   the image's baked copy remains as the fallback.
+  //
+  // - No upgrade = TRUE: deps are already baked at known-good versions, so
+  //   the refresh touches only the named package and avoids re-churning the
+  //   learnr/knitr/xfun chain (see the xfun ABI note in the devcontainers
+  //   Dockerfile).
+  //
+  // - ACCEPTED RISK — blast radius: tracking GitHub HEAD means a bad commit
+  //   to the refreshed package breaks EVERY new Codespace at once, with no
+  //   pinned image to shield us. The mitigation is operational, not config:
+  //   revert the offending commit upstream ASAP — that fixes all subsequent
+  //   creates immediately, with no image rebuild or pin bump needed.
 
   // "Setup complete" signal + onboarding, via postAttachCommand — NOT
   // postStartCommand. This distinction is the whole point: in Codespaces,
   // postStartCommand (and postCreateCommand) output is routed to the hidden
   // creation log, so a banner there is invisible — students finish the wait
   // staring at a bare prompt. postAttachCommand runs in a VISIBLE terminal,
-  // and since the lifecycle order is postCreate → postStart → postAttach, it
-  // fires only after the slow pak install (postCreateCommand) has finished.
-  // So the banner is both actually seen AND a true "ready" signal. It points
+  // and the lifecycle order (postCreate → postStart → postAttach) means it
+  // fires after any create-time work — so if the postCreateCommand above is
+  // ever revived, the banner stays a true "ready" signal. It points
   // students to STUDENT_WORKFLOW.md but deliberately does NOT auto-open it.
   // Absolute path via ${containerWorkspaceFolder} so it still resolves after a
   // student switches their open folder to their own repo. See welcome.sh.

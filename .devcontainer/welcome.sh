@@ -40,29 +40,14 @@ if command -v node >/dev/null 2>&1 && ! grep -qs 'workspace.trust.enabled' "$use
   ' "$user_settings"
 fi
 
-# Install the R Tutorials extension from Open VSX, pinned by version. It is
-# deliberately NOT in devcontainer.json's "extensions" list: that list is
-# resolved by VS Code against the Microsoft Marketplace only (official VS Code
-# cannot read Open VSX), and we publish this extension to Open VSX — the
-# Marketplace publish flow is not worth the pain (David, 2026-07). Open VSX
-# serves the .vsix at a stable versioned URL, and the `code` CLI (available at
-# attach time, which is why this lives here and not in postCreate) installs it
-# into the remote. The pin means no auto-update: to ship a new version,
-# publish to Open VSX, then bump RT_VERSION here — a launcher-only change.
-# Idempotent: skipped when this exact version is already installed, so it
-# costs one grep on every re-attach and a ~seconds download on the first.
-RT_VERSION="1.0.0"
-if command -v code >/dev/null 2>&1 \
-   && ! code --list-extensions --show-versions 2>/dev/null | grep -qi "^ppbds\.vscode-r-tutorials@${RT_VERSION}$"; then
-  rt_vsix="$(mktemp -t rt-vsix-XXXXXX)"
-  rt_url="https://open-vsx.org/api/PPBDS/vscode-r-tutorials/${RT_VERSION}/file/PPBDS.vscode-r-tutorials-${RT_VERSION}.vsix"
-  if curl -fsSL -o "$rt_vsix" "$rt_url" && code --install-extension "$rt_vsix" >/dev/null 2>&1; then
-    echo "→ Installed R Tutorials extension v${RT_VERSION}."
-  else
-    echo "! Could not install the R Tutorials extension (v${RT_VERSION}) — tutorials may not render. Re-attach to retry, or tell your instructor."
-  fi
-  rm -f "$rt_vsix"
-fi
+# NOTE: the R Tutorials extension (PPBDS.vscode-r-tutorials) is NOT installed
+# here. An attach-time `code --install-extension` (tried, 2026-07) leaves the
+# Activity Bar icon missing until the student reloads the window — and the
+# first attempt silently installed nothing (the code CLI treats a path
+# without a .vsix suffix as a marketplace identifier). The extension is baked
+# into the image instead (RT_EXT_VERSION in the PPBDS/devcontainers
+# Dockerfile), pre-extracted from the Open VSX .vsix so the icon exists from
+# first paint.
 
 # Give students a short terminal prompt: just the current folder name + "$",
 # e.g. "my-class-work $". The default devcontainers/Codespaces prompt is long

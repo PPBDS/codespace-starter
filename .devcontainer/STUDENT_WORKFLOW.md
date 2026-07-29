@@ -86,6 +86,83 @@ https://raw.githubusercontent.com/<your-username>/<your-repo>/main/plot.png
   git config --global user.email "you@example.com"
   ```
 
+## Under the hood: what `connect-repo.sh` actually does
+
+There is no magic in the script — it just runs a handful of `gh` (GitHub's
+command-line tool) and `git` commands for you. You will use these same
+commands all term, so it's worth seeing them once. In order:
+
+**1. Stop acting as the Codespace, start acting as you.**
+
+```bash
+unset GITHUB_TOKEN GH_TOKEN
+```
+
+A Codespace starts with a built-in login that can only *read* this
+`codespace-starter` repo — it cannot create repos or push to yours. Clearing
+it makes `gh` and `git` fall back to *your* GitHub identity (once you sign
+in, next step).
+
+**2. Sign in to GitHub as yourself.**
+
+```bash
+gh auth login --hostname github.com --git-protocol https --web
+```
+
+This opens the browser prompt where you click **Authorize**. It's the step
+that lets everything after act as you.
+
+**3. Make `git push` use your login everywhere.**
+
+```bash
+git config --global credential.helper store
+```
+
+The script then saves your token (from `gh auth token`) into
+`~/.git-credentials`, so pushes work from the terminal *and* from the Source
+Control panel — the panel runs git with the old built-in token still in its
+environment, and the credential store is what overrides it.
+
+**4. Create your repo — or connect to one that already exists.**
+
+```bash
+gh repo create my-class-work --public --clone    # new repo, cloned locally
+gh repo clone my-class-work                      # yours, from a past session
+gh repo clone owner/some-assignment              # someone else's (need access)
+```
+
+Either way you end up with the repo at `/workspaces/<name>`.
+
+**5. Small conveniences.** The script also copies `AGENTS.md` into the repo
+(the AI guidance — see above), makes new terminals open in your repo instead
+of the launcher, and drops your current terminal into the repo.
+
+**Do it yourself instead?** Absolutely — this works any time, no script
+needed:
+
+```bash
+unset GITHUB_TOKEN GH_TOKEN
+gh auth login --hostname github.com --git-protocol https --web
+cd /workspaces
+gh repo create my-class-work --public --clone
+cd my-class-work
+```
+
+(Prefer pure git? Create the empty repo on github.com in your browser, then
+`git clone https://github.com/<you>/my-class-work`.) From there, the everyday
+cycle is plain git, exactly what the Source Control panel does for you:
+
+```bash
+git add -A
+git commit -m "describe what you changed"
+git push
+```
+
+What you'd give up by going manual: the auto-opening of new terminals in
+your repo, the `AGENTS.md` copy, and the ready-banner bookkeeping — all
+conveniences, none essential. Run `.devcontainer/connect-repo.sh --help` to
+see the same story told by the script itself.
+
 ## What's in your workshop (and when to use what)
 
 Everything here is already installed. A quick map of what to reach for — and

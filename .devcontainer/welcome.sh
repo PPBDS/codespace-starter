@@ -70,6 +70,19 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # codespace-starter/.devc
 guide="$here/STUDENT_WORKFLOW.md"
 marker="$HOME/.student_repo"
 
+# Provenance line for the banner, read LIVE from the launcher checkout so it
+# can never drift from reality: the image pin straight from devcontainer.json,
+# and the date of this repo's last commit — which also captures VS Code
+# settings / script changes, i.e. "the setup state this Codespace was born
+# from". Both reads are guarded; on any failure the line is simply omitted
+# (an empty line in the banner), never an error.
+img="$(grep -o 'ghcr\.io/ppbds/devcontainer:[0-9][0-9.]*' "$here/devcontainer.json" 2>/dev/null | head -1)"
+upd="$(git -C "$here/.." log -1 --format='%cd' --date=format:'%Y-%m-%d' 2>/dev/null)"
+prov=""
+if [[ -n "$img" ]]; then
+  prov="   ${img}${upd:+ · setup updated ${upd}}"
+fi
+
 # postAttachCommand always runs in the codespace-starter folder (not the
 # student's open folder), so we can't detect progress by directory. connect-repo.sh
 # drops a marker once a repo has been created; until then, show the "how to
@@ -85,6 +98,8 @@ if [[ ! -f "$marker" ]]; then
        .devcontainer/connect-repo.sh <repo-name>
 
    Full guide: ${guide}
+
+${prov}
 
    Type \`clear\` to remove this banner.
 ════════════════════════════════════════════════════════════

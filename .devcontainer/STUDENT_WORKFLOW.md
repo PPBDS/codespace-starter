@@ -189,9 +189,9 @@ interactive pieces run in the browser, so you never need a server.
   browser via WebAssembly, so even reactive apps publish to GitHub Pages.
 
 **Help while you work**
-- **AI assistants in the terminal** — `claude`, `codex`, `agy`, `aider`.
-  Sign in (or set an API key) and ask for coding help. (They're terminal
-  tools by design — they work on every device, even a tablet.)
+- **AI assistants in the terminal** — `claude`, `codex`, `agy`, `grok`,
+  `aider`. Sign in (or set an API key) and ask for coding help. (They're
+  terminal tools by design — they work on every device, even a tablet.)
 - **AGENTS.md** — `connect-repo` puts this file in your repo (skip it with
   `connect-repo.sh --no-agents <name>`). It tells AI assistants — including
   GitHub Copilot — how to work with you in this course: short, narrated

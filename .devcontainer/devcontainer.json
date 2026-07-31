@@ -9,7 +9,7 @@
   // repo is just data, opened as a folder inside the same Codespace; it needs
   // no prebuild of its own.
 
-  // The PPBDS image, pinned to v1.0.6. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.0.7. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -42,10 +42,11 @@
   // packages (R plotly/leaflet/DT/crosstalk + Python plotly/altair/folium/
   // itables; shiny+shinylive compile to WebAssembly for static hosting),
   // Observable (Quarto renders {ojs} cells out of the box; the `observable`
-  // Framework CLI is also installed), and four AI coding CLIs:
+  // Framework CLI is also installed), and five AI coding CLIs:
   //   - claude  (Anthropic)         — sign in with a Claude plan, or ANTHROPIC_API_KEY
   //   - codex   (OpenAI)            — sign in with a ChatGPT plan, or `codex login`
   //   - agy     (Antigravity/Google)— sign in with a Google account, or ANTIGRAVITY_API_KEY
+  //   - grok    (Grok Build/xAI)    — sign in with a SuperGrok or X Premium+ plan
   //   - aider   (multi-provider)    — key-only: DeepSeek/OpenRouter for cheap models
   // Signing in on first run is the recommended path; API keys (set as
   // Codespaces user secrets at https://github.com/settings/codespaces) are
@@ -56,7 +57,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.0.6",
+  "image": "ghcr.io/ppbds/devcontainer:1.0.7",
 
   // NO postCreateCommand right now — RETIRED 2026-07-30. All course
   // packages, including primer.tutorials, ship at whatever versions the

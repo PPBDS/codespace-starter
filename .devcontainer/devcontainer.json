@@ -17,7 +17,7 @@
   // so KEEP this note). Also note: an ordinary push to main touching this
   // file does not reliably fire a prebuild either — the 2026-08-11 "better
   // start up" push never triggered one.)
-  // The PPBDS image, pinned to v1.1.4. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.1.5. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -65,7 +65,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.1.4",
+  "image": "ghcr.io/ppbds/devcontainer:1.1.5",
 
   // NO postCreateCommand right now — RETIRED 2026-07-30. All course
   // packages, including primer.tutorials, ship at whatever versions the
@@ -277,9 +277,30 @@
         // Don't prompt "are you sure?" before push/pull.
         "git.confirmSync": false,
 
-        // Don't fetch from the remote in the background. Keeps things
-        // predictable and avoids confusing status bar changes.
-        "git.autofetch": false,
+        // Don't inject VS Code's git-askpass into terminals (GIT_ASKPASS and
+        // friends). Terminal git auth here comes from the container's
+        // credential store, which connect-repo sets up (`credential.helper
+        // store` + the student's token) — VS Code's injection is redundant AND
+        // is one of the two extensions that make the first terminal show the
+        // "⚠ extensions want to relaunch the terminal" warning (the other is
+        // the closed-source GitHub Codespaces extension, no known knob). The
+        // Source Control panel's own auth is a separate setting
+        // (github.gitAuthentication) and is untouched. Verify after any change:
+        // `connect-repo` end to end, then a terminal `git push`.
+        "git.terminalAuthentication": false,
+
+        // Fetch from the remote in the background. This was `false` (2026-07,
+        // "keeps things predictable, avoids confusing status-bar changes") until
+        // 2026-09-16, when reading the Git extension's source showed that ONLY
+        // `true` suppresses the "Would you like Code to periodically run git
+        // fetch?" popup: the prompt fires whenever autofetch is not `true` AND a
+        // per-Codespace "already asked" flag is unset — so `false` and unset
+        // are treated identically, and every fresh Codespace asked again on the
+        // student's first push/sync. The cost of `true` is an occasional ↓N
+        // status-bar arrow when the remote has commits the local doesn't, which
+        // for a solo student repo essentially only happens across two
+        // Codespaces. Do NOT set this back to false expecting the popup to stop.
+        "git.autofetch": true,
 
         // Auto-save files after a short delay. Prevents the #1 beginner
         // problem: "my code isn't working" because the file wasn't saved.

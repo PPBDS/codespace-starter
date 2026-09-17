@@ -140,6 +140,12 @@ if [[ ! -f "$marker" ]]; then
 
 BANNER
 else
+  # The marker holds the repo's BASENAME only (connect-repo.sh writes "$dir";
+  # its .bashrc hook relies on there being no slash). Print the full path.
   connected="$(cat "$marker" 2>/dev/null)"
-  printf '\n   ✅  Connected: %s\n\n' "${connected:-your repo}"
+  if [[ -n "$connected" && "$connected" != */* ]]; then
+    printf '\n   ✅  Connected: /workspaces/%s\n\n' "$connected"
+  else
+    printf '\n   ✅  Connected: your repo\n\n'
+  fi
 fi

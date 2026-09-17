@@ -111,7 +111,7 @@ in, next step).
 **2. Sign in to GitHub as yourself.**
 
 ```bash
-gh auth login --hostname github.com --git-protocol https --web
+gh auth login --hostname github.com --git-protocol https --web --clipboard=false
 ```
 
 This opens the browser prompt where you click **Authorize**. It's the step
@@ -147,7 +147,7 @@ needed:
 
 ```bash
 unset GITHUB_TOKEN GH_TOKEN
-gh auth login --hostname github.com --git-protocol https --web
+gh auth login --hostname github.com --git-protocol https --web --clipboard=false
 cd /workspaces
 gh repo create my-class-work --public --clone
 cd my-class-work

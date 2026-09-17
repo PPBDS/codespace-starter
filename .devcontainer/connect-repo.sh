@@ -53,7 +53,7 @@ use these commands all term, so it's worth understanding them.
      `git` use YOUR GitHub login instead.
 
   2. SIGN IN TO GITHUB AS YOURSELF (once per Codespace)
-         gh auth login --hostname github.com --git-protocol https --web
+         gh auth login --hostname github.com --git-protocol https --web --clipboard=false
      Opens a browser sign-in. Click Authorize, then come back.
 
   3. MAKE `git push` AUTHENTICATE AS YOU
@@ -155,7 +155,7 @@ if ! gh auth status >/dev/null 2>&1; then
   # Codespaces browser-opener (Node), which prints a scary-looking
   # `url.parse()` DeprecationWarning. That's upstream noise, not a problem
   # here — suppress it so students aren't alarmed mid-sign-in.
-  NODE_NO_WARNINGS=1 gh auth login --hostname github.com --git-protocol https --web
+  NODE_NO_WARNINGS=1 gh auth login --hostname github.com --git-protocol https --web --clipboard=false
 fi
 
 # 3b. Make `git push` authenticate as YOU — from BOTH the terminal AND the VS

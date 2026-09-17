@@ -79,13 +79,26 @@ else
   fail "usage text is not short-form: $usage_out"
 fi
 
-# ---- welcome.sh with marker: silent, and idempotent on re-run -----------
-touch "$HOME/.student_repo"
+# ---- welcome.sh with marker: exactly one Connected line -----------------
+# (postAttach re-runs after connect-repo's folder switch; silence there read
+# as broken. The marker branch prints the connected repo and nothing else —
+# no banner, no provenance line.)
+echo "/workspaces/test-repo" > "$HOME/.student_repo"
 out2="$(bash "$here/welcome.sh")"
 if grep -q "YOUR CODESPACE IS READY" <<<"$out2"; then
   fail "banner shown even though the student-repo marker exists"
 else
-  ok "banner silent once marker exists"
+  ok "banner suppressed once marker exists"
+fi
+if grep -qF "Connected: /workspaces/test-repo" <<<"$out2"; then
+  ok "connected line names the marker's repo"
+else
+  fail "connected line missing or wrong: $out2"
+fi
+if grep -q "ghcr.io/" <<<"$out2"; then
+  fail "provenance line printed in the marker case (should be the one line only)"
+else
+  ok "marker case prints nothing but the connected line"
 fi
 rm -f "$HOME/.student_repo"
 
@@ -128,6 +141,14 @@ if grep -qF '"Welcome!": "bash ${containerWorkspaceFolder}/.devcontainer/welcome
   ok "postAttachCommand key is 'Welcome!'"
 else
   fail "postAttachCommand key is not 'Welcome!' (terminal label would regress)"
+fi
+
+# ---- startup terminal policy --------------------------------------------
+# Guards the intent only (the effect is a client behavior, verified live).
+if grep -qF '"terminal.integrated.hideOnStartup": "always"' "$here/devcontainer.json"; then
+  ok "hideOnStartup is 'always'"
+else
+  fail "hideOnStartup is not 'always' (two startup terminals would return)"
 fi
 
 # ---- verdict ------------------------------------------------------------

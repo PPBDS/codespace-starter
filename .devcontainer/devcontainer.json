@@ -258,6 +258,17 @@
         // startup get the contributed environment normally.
         "terminal.integrated.environmentChangesIndicator": "off",
 
+        // Don't auto-create VS Code's default terminal at startup. Students
+        // were getting TWO terminals ("bash" + "Codespaces: Welcome!") and
+        // asking why; the default one is also the one that carries the
+        // "⚠ extensions want to relaunch" warning, because it is created
+        // before the Git/Codespaces extensions activate and no setting can
+        // suppress that contribution (verified 2026-09-17). The Welcome
+        // terminal is created explicitly by the Codespaces extension for
+        // postAttachCommand and is unaffected. If a fresh Codespace ever
+        // shows NO terminal and no banner, revert this one line.
+        "terminal.integrated.hideOnStartup": "always",
+
         // NOTE — we want to suppress VS Code's Welcome / "Get Started" tab,
         // but there is currently NO way to do it from here. The setting that
         // controls it, workbench.startupEditor, is application-scoped: VS

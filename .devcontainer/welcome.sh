@@ -18,16 +18,24 @@ set -uo pipefail
 # Disable VS Code Workspace Trust for this Codespace. Without this, a repo a
 # student opens via File → Open Folder starts in Restricted Mode (VS Code hasn't
 # "trusted" that folder): they get a "do you trust the authors?" prompt, and
-# Restricted Mode can suppress settings/features — e.g. the "run git fetch
-# automatically?" prompt reappears. Disabling trust lets the Codespace's
-# Machine-scope settings (arf console, autosave, git.autofetch off, …) apply
-# cleanly to whatever folder the student opens — which is exactly why
+# Restricted Mode can suppress settings/features. Disabling trust lets the
+# Codespace's Machine-scope settings (arf console, autosave, git settings, …)
+# apply cleanly to whatever folder the student opens — which is exactly why
 # connect-repo no longer needs to seed a per-repo .vscode/settings.json (see its
 # NOTE). A Codespace is an isolated, managed container GitHub already
-# auto-trusts, so turning the check
-# off is safe. It's an application-scoped setting, so it must live in VS Code's
-# *user* settings — it can't go in devcontainer/workspace settings (those are
-# ignored for it). Idempotent: only written once.
+# auto-trusts, so turning the check off is safe. It's an application-scoped
+# setting, so it must live in VS Code's *user* settings — it can't go in
+# devcontainer/workspace settings (those are ignored for it).
+#
+# TIMING: this runs at postAttachCommand, AFTER the first window has attached
+# and already shown the trust prompts — so on its own it only helps later
+# folder opens. Since image v1.1.5 the same file is BAKED into the image, so
+# the prompts never fire; this write is belt-and-suspenders for older images
+# and self-heals if the file is ever removed. Idempotent: skips when the key is
+# present. (An earlier version of this comment blamed Restricted Mode for the
+# "run git fetch automatically?" popup — wrong: that popup fires whenever
+# git.autofetch is not `true`; see the comment on that setting in
+# devcontainer.json.)
 user_settings="$HOME/.vscode-remote/data/User/settings.json"
 if command -v node >/dev/null 2>&1 && ! grep -qs 'workspace.trust.enabled' "$user_settings"; then
   mkdir -p "$(dirname "$user_settings")"

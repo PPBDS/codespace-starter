@@ -27,15 +27,19 @@ set -uo pipefail
 # setting, so it must live in VS Code's *user* settings — it can't go in
 # devcontainer/workspace settings (those are ignored for it).
 #
-# TIMING: this runs at postAttachCommand, AFTER the first window has attached
-# and already shown the trust prompts — so on its own it only helps later
-# folder opens. Since image v1.1.5 the same file is BAKED into the image, so
-# the prompts never fire; this write is belt-and-suspenders for older images
-# and self-heals if the file is ever removed. Idempotent: skips when the key is
-# present. (An earlier version of this comment blamed Restricted Mode for the
-# "run git fetch automatically?" popup — wrong: that popup fires whenever
-# git.autofetch is not `true`; see the comment on that setting in
-# devcontainer.json.)
+# STATUS 2026-09-17 — DOES NOT WORK, MECHANISM UNKNOWN. Since image v1.1.5 this
+# exact file is also BAKED into the image, and a fresh Codespace was verified
+# to have it in place (correct content, build-time mtime, not a mount) before
+# the editor started — and the trust modal STILL appeared, at startup and
+# again after connect-repo's folder switch. So this setting, in the
+# server-side user settings.json, does not govern the trust prompt in the
+# Codespaces web client. (The 2026-08-22 "reload → no prompts" observation
+# was a false positive: the folder had already been trusted by a click.) Kept
+# for now, harmless and idempotent, pending the Settings-UI diagnostic that
+# will show whether the client reads this file at all. Do not build on it.
+# (An earlier version of this comment blamed Restricted Mode for the "run git
+# fetch automatically?" popup — also wrong: that popup fires whenever
+# git.autofetch is not `true`; see devcontainer.json.)
 user_settings="$HOME/.vscode-remote/data/User/settings.json"
 if command -v node >/dev/null 2>&1 && ! grep -qs 'workspace.trust.enabled' "$user_settings"; then
   mkdir -p "$(dirname "$user_settings")"
@@ -114,11 +118,14 @@ if [[ -n "$img" ]]; then
   prov="   ${img}${upd:+ · setup updated ${upd}}"
 fi
 
-# postAttachCommand always runs in the codespace-starter folder (not the
-# student's open folder), so we can't detect progress by directory. connect-repo.sh
-# drops a marker once a repo has been created; until then, show the "how to
-# start" banner. Once a repo exists there's nothing more to say — stay silent
-# (no returning banner; the short prompt already shows which folder you're in).
+# postAttachCommand runs on EVERY attach — including the re-attach after
+# connect-repo switches the window to the student's repo (inherent to the
+# hook; not suppressible). It always runs in the codespace-starter folder, so
+# progress is detected via the marker connect-repo.sh drops (~/.student_repo,
+# containing the repo's directory). Before the marker: provenance line + the
+# "how to start" banner. After it: ONE line naming the connected repo and
+# nothing else (David, 2026-09-17) — it used to stay silent, but a tab named
+# "Welcome!" showing a bare command line and no output reads as broken.
 if [[ ! -f "$marker" ]]; then
   [[ -n "$prov" ]] && printf '\n%s\n' "$prov"
   cat <<BANNER
@@ -132,4 +139,7 @@ if [[ ! -f "$marker" ]]; then
 ════════════════════════════════════════════════════════════
 
 BANNER
+else
+  connected="$(cat "$marker" 2>/dev/null)"
+  printf '\n   ✅  Connected: %s\n\n' "${connected:-your repo}"
 fi

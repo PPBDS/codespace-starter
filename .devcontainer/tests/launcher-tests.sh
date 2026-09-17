@@ -82,8 +82,9 @@ fi
 # ---- welcome.sh with marker: exactly one Connected line -----------------
 # (postAttach re-runs after connect-repo's folder switch; silence there read
 # as broken. The marker branch prints the connected repo and nothing else —
-# no banner, no provenance line.)
-echo "/workspaces/test-repo" > "$HOME/.student_repo"
+# no banner, no provenance line. The marker holds the BASENAME only, exactly
+# as connect-repo.sh writes it; welcome.sh must add the /workspaces/ prefix.)
+echo "test-repo" > "$HOME/.student_repo"
 out2="$(bash "$here/welcome.sh")"
 if grep -q "YOUR CODESPACE IS READY" <<<"$out2"; then
   fail "banner shown even though the student-repo marker exists"

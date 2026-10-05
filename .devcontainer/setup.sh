@@ -60,13 +60,22 @@ fi
 #    delayed ten seconds to survive a VS Code relaunch of the first
 #    terminal) and never after connect-repo (~/.student_repo). All of that
 #    logic lives in welcome.sh so this hook stays a one-liner. Gated on an
-#    interactive shell only — the R console (arf) is launched directly, not
-#    via bash, so it never sees this; task terminals are non-interactive. The
-#    path is baked in absolute via %q so the hook keeps working from any
-#    folder the student switches to. Idempotent via the sentinel.
+#    interactive shell WITH a terminal on stdout (-t 1): the devcontainer
+#    tooling probes the user's environment by spawning an interactive login
+#    shell (userEnvProbe, default loginInteractiveShell) — with only the
+#    interactive test, that invisible probe shell printed the banner and
+#    burned its one showing before the student's first real terminal opened
+#    (2026-10-05, v1.1.7 rollout). The base image's first-run hook uses the
+#    same -t 1 guard for the same reason. The R console (arf) is launched
+#    directly, not via bash, so it never sees this; task terminals are
+#    non-interactive. CODESPACE_STARTER_BANNER_FORCE=1 bypasses the tty test
+#    for the CI tests, which run bash -i without a pty. The path is baked in
+#    absolute via %q so the hook keeps working from any folder the student
+#    switches to. Idempotent via the sentinel.
 if ! grep -qF 'codespace-starter:banner' "$bashrc" 2>/dev/null; then
   {
     printf '\n# codespace-starter:banner — the "your Codespace is ready" banner (see .devcontainer/welcome.sh).\n'
-    printf 'if [[ $- == *i* && -r %q ]]; then bash %q; fi\n' "$here/welcome.sh" "$here/welcome.sh"
+    # shellcheck disable=SC2016  # the ${…} is meant literally: it is evaluated by the student's shell, not here
+    printf 'if [[ $- == *i* && ( -t 1 || -n ${CODESPACE_STARTER_BANNER_FORCE:-} ) && -r %q ]]; then bash %q; fi\n' "$here/welcome.sh" "$here/welcome.sh"
   } >> "$bashrc"
 fi

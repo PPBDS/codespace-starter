@@ -232,9 +232,14 @@ fi
 # 6b. Say, in one line, what is now connected to what — the whole point of
 #     this script. The path is where the student works; the URL is the GitHub
 #     repo it saves to (read from git so it is never wrong about the owner —
-#     an owner/<name> argument clones someone else's repo).
+#     an owner/<name> argument clones someone else's repo). Normalized to a
+#     plain https://github.com/<owner>/<repo> web URL: a pre-existing clone
+#     (step 4 accepts one as is) may have a token in its URL
+#     (https://TOKEN@github.com/…) or be an SSH remote (git@github.com:…) —
+#     the first must never reach the terminal scrollback (Copilot, PR #54).
 origin="$(git -C "/workspaces/$dir" remote get-url origin 2>/dev/null || true)"
 origin="${origin%.git}"
+origin="$(printf '%s' "$origin" | sed -E 's#^[a-z+]+://[^@/]*@#https://#; s#^git@([^:]+):#https://\1/#')"
 printf '\n   ✅  Connected: /workspaces/%s%s\n\n' "$dir" "${origin:+  →  ${origin}}"
 
 # 7. Put THIS terminal in the repo too. Steps 2b and 6 only fix NEW terminals

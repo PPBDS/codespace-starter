@@ -59,6 +59,11 @@ fi
 # expects a banner.
 shown="$HOME/.config/codespace-starter/banner-shown"
 export CODESPACE_STARTER_BANNER_DELAY=0
+# The hook also requires a terminal on stdout (so the devcontainer env probe's
+# invisible interactive shell never consumes the one showing); CI has no pty,
+# so the tests opt out of that one test explicitly. The probe case itself is
+# tested below by NOT setting it.
+export CODESPACE_STARTER_BANNER_FORCE=1
 rm -f "$shown"
 if ! out="$(bash "$here/welcome.sh")"; then
   fail "welcome.sh exited non-zero"
@@ -130,6 +135,22 @@ if grep -q "YOUR CODESPACE IS READY" <<<"$hook_out_2"; then
   fail "second interactive shell printed the banner again"
 else
   ok "second interactive shell is clean"
+fi
+
+# The env-probe case: an interactive shell WITHOUT a terminal on stdout (what
+# userEnvProbe spawns) must neither print nor consume the one showing.
+rm -f "$shown"
+probe_out="$(CODESPACE_STARTER_BANNER_FORCE='' bash -ic 'true' 2>/dev/null || true)"
+if grep -q "YOUR CODESPACE IS READY" <<<"$probe_out"; then
+  fail "a non-tty interactive shell (env probe) printed the banner"
+else
+  ok "non-tty interactive shell (env probe) prints nothing"
+fi
+sleep 1
+if [[ -f "$shown" ]]; then
+  fail "the env-probe shell consumed the banner's one showing"
+else
+  ok "env-probe shell did not consume the one showing"
 fi
 
 # ---- wrapper ------------------------------------------------------------

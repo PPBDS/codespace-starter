@@ -262,6 +262,16 @@
         // extension (baked, >= 1.2.0) does the closing when this is on.
         "rTutorials.closeWelcomeOnStartup": true,
 
+        // Word boundaries for R: treat `.` and `_` as parts of a name, so a
+        // double-click on `my_data.frame` selects the whole thing. This used
+        // to arrive invisibly via the rocker base image's r-rig feature
+        // metadata; image v1.1.8 stopped inheriting that metadata (it also
+        // smuggled in extensions), so the one setting worth keeping lives
+        // here, where it can be seen.
+        "[r]": {
+          "editor.wordSeparators": "`~!@#%$^&*()-=+[{]}\\|;:'\",<>/?"
+        },
+
         // Make the "Run Source" button (the ▷ in the editor title bar) and its
         // Ctrl/Cmd+Shift+S shortcut run source(FILE, echo = TRUE) instead of a
         // silent source, so students see each line echo as it executes — not

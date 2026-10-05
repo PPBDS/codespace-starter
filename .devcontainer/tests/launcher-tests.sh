@@ -244,7 +244,9 @@ if [[ -d "$baked_dir" && -n "$pinned" ]]; then
   if [[ -d "$baked_dir/reditorsupport.r-$pinned" ]]; then
     ok "image bakes the pinned vscode-R ($pinned)"
   else
-    fail "pinned vscode-R $pinned is not what the image bakes: $(ls "$baked_dir" | grep -E '^reditorsupport\.r-' | tr '\n' ' ')"
+    baked=""
+    for d in "$baked_dir"/reditorsupport.r-*; do [[ -d "$d" ]] && baked+="${d##*/} "; done
+    fail "pinned vscode-R $pinned is not what the image bakes: ${baked:-nothing}"
   fi
 else
   ok "image lockstep check skipped (not running inside the image)"

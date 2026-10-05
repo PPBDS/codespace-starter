@@ -17,7 +17,7 @@
   // so KEEP this note). Also note: an ordinary push to main touching this
   // file does not reliably fire a prebuild either — the 2026-08-11 "better
   // start up" push never triggered one.)
-  // The PPBDS image, pinned to v1.1.5. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.1.6. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -35,6 +35,11 @@
   //
   // Bakes in: gh, quarto, arf (Rust R console), httpgd, pak,
   // tutorial.helpers, vscode.tutorials, misc.tutorials, primer.tutorials,
+  // learnr2 (what the baked R Tutorials extension, 1.1.0+, lists and runs
+  // tutorials through),
+  // an images + animation set (magick/rsvg/webp/png/jpeg, ggimage/
+  // ggpattern/ggfx, gganimate with gifski + av, transformr, camcorder; and
+  // Pillow/scikit-image/imageio on the Python side, plus the ffmpeg CLI),
   // a modeling stack (tidymodels + xgboost/lightgbm/catboost/randomForest/
   // ranger/glmnet engines + brms for Bayesian/Stan),
   // a mapping/census stack (sf + tidycensus/tigris for census-tract maps,
@@ -65,7 +70,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.1.5",
+  "image": "ghcr.io/ppbds/devcontainer:1.1.6",
 
   // NO postCreateCommand right now — RETIRED 2026-07-30. All course
   // packages, including primer.tutorials, ship at whatever versions the

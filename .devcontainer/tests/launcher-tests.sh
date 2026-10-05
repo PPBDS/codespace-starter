@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 #
-# launcher-tests.sh — CI tests for the launcher scripts (welcome.sh and the
-# connect-repo wrapper). Run INSIDE the student image (see
-# .github/workflows/launcher-tests.yml), where welcome.sh's $HOME side
-# effects (wrapper install, .bashrc prompt append, user-settings write) land
-# in a throwaway container home.
+# launcher-tests.sh — CI tests for the launcher scripts (setup.sh, welcome.sh
+# and the connect-repo wrapper). Run INSIDE the student image (see
+# .github/workflows/launcher-tests.yml), where setup.sh's $HOME side effects
+# (wrapper install, .bashrc appends) land in a throwaway container home.
 #
 # Also runnable locally — but ONLY with a sandbox HOME, or it will edit your
 # real ~/.bashrc:   HOME=$(mktemp -d) bash .devcontainer/tests/launcher-tests.sh
 #
 # Scope: everything testable without a GitHub login. connect-repo's real work
-# (gh auth, repo creation) is deliberately out of scope — that stays a manual
-# check in a live Codespace.
+# (gh auth, repo creation, the closing "Connected:" line) is deliberately out
+# of scope — that stays a manual check in a live Codespace.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # .devcontainer
@@ -19,8 +18,42 @@ fails=0
 fail() { echo "FAIL: $*" >&2; fails=$((fails + 1)); }
 ok()   { echo "  ok: $*"; }
 
-# ---- welcome.sh with no marker: banner + wrapper ------------------------
+# ---- setup.sh: wrapper + two .bashrc blocks, idempotent --------------------
 rm -f "$HOME/.student_repo"
+if ! bash "$here/setup.sh"; then
+  fail "setup.sh exited non-zero"
+fi
+bash "$here/setup.sh" >/dev/null 2>&1 || true   # second run must be a no-op
+
+wrapper="$HOME/.local/bin/connect-repo"
+if [[ -x "$wrapper" ]]; then
+  ok "wrapper installed and executable"
+else
+  fail "wrapper missing or not executable at $wrapper"
+fi
+
+n="$(grep -cF 'codespace-starter:short-prompt' "$HOME/.bashrc" 2>/dev/null || true)"
+if [[ "$n" -eq 1 ]]; then
+  ok "prompt block appended exactly once after two runs"
+else
+  fail "prompt block count in .bashrc is $n, expected 1"
+fi
+
+n="$(grep -cF 'codespace-starter:banner' "$HOME/.bashrc" 2>/dev/null || true)"
+if [[ "$n" -eq 1 ]]; then
+  ok "banner hook appended exactly once after two runs"
+else
+  fail "banner hook count in .bashrc is $n, expected 1"
+fi
+
+# Retired side effects must stay retired (one-terminal design, 2026-10).
+if grep -qs 'workspace.trust' "$HOME/.vscode-remote/data/User/settings.json"; then
+  fail "a trust setting was written again (dead code — see devcontainer.json)"
+else
+  ok "no trust setting written"
+fi
+
+# ---- welcome.sh with no marker: banner ----------------------------------
 if ! out="$(bash "$here/welcome.sh")"; then
   fail "welcome.sh exited non-zero"
 fi
@@ -37,6 +70,12 @@ else
   fail "banner missing 'connect-repo <insert-repo-name>'"
 fi
 
+if grep -q "ghcr.io/ppbds/devcontainer:" <<<"$out"; then
+  ok "provenance line names the image pin"
+else
+  fail "provenance line missing (devcontainer.json pin unreadable?)"
+fi
+
 # Retired lines must stay retired (redesign, 2026-08-15).
 if grep -q "STUDENT_WORKFLOW" <<<"$out"; then
   fail "banner links the guide again (removed in redesign)"
@@ -49,16 +88,21 @@ else
   ok "banner has no clear-hint"
 fi
 
-# ---- wrapper ------------------------------------------------------------
-wrapper="$HOME/.local/bin/connect-repo"
-if [[ -x "$wrapper" ]]; then
-  ok "wrapper installed and executable"
+# ---- the .bashrc hook end to end ----------------------------------------
+# An interactive bash with this HOME must print the banner from the hook
+# setup.sh installed — this is the whole delivery path now that there is no
+# postAttach terminal. (-i without a tty makes bash grumble on stderr about
+# job control; that is noise, hence 2>/dev/null.)
+hook_out="$(bash -ic 'true' 2>/dev/null || true)"
+if grep -q "YOUR CODESPACE IS READY" <<<"$hook_out"; then
+  ok "interactive shell prints the banner via the .bashrc hook"
 else
-  fail "wrapper missing or not executable at $wrapper"
+  fail "interactive shell did not print the banner (hook broken?)"
 fi
 
+# ---- wrapper ------------------------------------------------------------
 # From a foreign directory: args must forward, and the real script must still
-# self-locate (this is why it's an exec wrapper, not a symlink — see welcome.sh).
+# self-locate (this is why it's an exec wrapper, not a symlink — see setup.sh).
 if (cd /tmp && "$wrapper" --help | grep -q "connect-repo — create or connect"); then
   ok "wrapper --help works from a foreign directory"
 else
@@ -79,46 +123,33 @@ else
   fail "usage text is not short-form: $usage_out"
 fi
 
-# ---- welcome.sh with marker: exactly one Connected line -----------------
-# (postAttach re-runs after connect-repo's folder switch; silence there read
-# as broken. The marker branch prints the connected repo and nothing else —
-# no banner, no provenance line. The marker holds the BASENAME only, exactly
-# as connect-repo.sh writes it; welcome.sh must add the /workspaces/ prefix.)
+# ---- welcome.sh with marker: silence ------------------------------------
+# connect-repo reports the connected repo itself; once its marker exists the
+# banner must print nothing at all, in the hook and when run directly.
 echo "test-repo" > "$HOME/.student_repo"
 out2="$(bash "$here/welcome.sh")"
-if grep -q "YOUR CODESPACE IS READY" <<<"$out2"; then
-  fail "banner shown even though the student-repo marker exists"
+if [[ -z "$out2" ]]; then
+  ok "welcome.sh is silent once the marker exists"
 else
-  ok "banner suppressed once marker exists"
+  fail "welcome.sh printed with the marker present: $out2"
 fi
-if grep -qF "Connected: /workspaces/test-repo" <<<"$out2"; then
-  ok "connected line names the marker's repo"
+hook_out2="$(bash -ic 'true' 2>/dev/null || true)"
+if grep -q "YOUR CODESPACE IS READY" <<<"$hook_out2"; then
+  fail "interactive shell still prints the banner with the marker present"
 else
-  fail "connected line missing or wrong: $out2"
-fi
-if grep -q "ghcr.io/" <<<"$out2"; then
-  fail "provenance line printed in the marker case (should be the one line only)"
-else
-  ok "marker case prints nothing but the connected line"
+  ok "interactive shell is quiet once the marker exists"
 fi
 rm -f "$HOME/.student_repo"
 
-# Re-running must not stack prompt blocks in .bashrc (sentinel idempotency).
-n="$(grep -cF 'codespace-starter:short-prompt' "$HOME/.bashrc" 2>/dev/null || true)"
-if [[ "$n" -le 1 ]]; then
-  ok "prompt block appended at most once (count: $n)"
-else
-  fail "prompt block duplicated in .bashrc (count: $n)"
-fi
-
 # ---- wrapper-install failure: banner must fall back to the long form ----
 # Simulate the install failing by making $HOME/.local/bin a regular FILE
-# (mkdir -p then fails even as root). welcome.sh is non-fatal by design, so
-# the banner must then advertise the long-form command instead of a
+# (mkdir -p then fails even as root). setup.sh is non-fatal by design, so the
+# banner must then advertise the long-form command instead of a
 # `connect-repo` that doesn't exist (Copilot review, PR #50).
 sandbox="$(mktemp -d)"
 mkdir -p "$sandbox/.local"
 : > "$sandbox/.local/bin"
+HOME="$sandbox" bash "$here/setup.sh" >/dev/null 2>&1 || true
 out3="$(HOME="$sandbox" bash "$here/welcome.sh" 2>/dev/null)"
 if grep -qF ".devcontainer/connect-repo.sh <insert-repo-name>" <<<"$out3"; then
   ok "banner falls back to long form when wrapper install fails"
@@ -132,25 +163,21 @@ else
 fi
 rm -rf "$sandbox"
 
-# ---- terminal label -----------------------------------------------------
-# The postAttachCommand key is what Codespaces uses to label the welcome
-# terminal ("Codespaces: Welcome!"). The label itself is applied by the
-# platform and can't be asserted here — this only guards the key from a
-# silent revert.
+# ---- devcontainer.json wiring -------------------------------------------
+# Guards the intent only (the effects are client behaviors, verified live).
 # shellcheck disable=SC2016  # ${containerWorkspaceFolder} is literal JSON text, not a shell expansion
-if grep -qF '"Welcome!": "bash ${containerWorkspaceFolder}/.devcontainer/welcome.sh"' "$here/devcontainer.json"; then
-  ok "postAttachCommand key is 'Welcome!'"
+if grep -qF '"onCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/setup.sh"' "$here/devcontainer.json"; then
+  ok "onCreateCommand runs setup.sh"
 else
-  fail "postAttachCommand key is not 'Welcome!' (terminal label would regress)"
+  fail "onCreateCommand does not run setup.sh (nothing would install the banner hook)"
 fi
-
-# ---- startup terminal policy --------------------------------------------
-# Guards the intent only (the effect is a client behavior, verified live).
-if grep -qF '"terminal.integrated.hideOnStartup": "always"' "$here/devcontainer.json"; then
-  ok "hideOnStartup is 'always'"
-else
-  fail "hideOnStartup is not 'always' (two startup terminals would return)"
-fi
+for key in postAttachCommand terminal.integrated.hideOnStartup terminal.integrated.environmentChangesRelaunch terminal.integrated.environmentChangesIndicator; do
+  if grep -E "^\s*\"$key\"" "$here/devcontainer.json" >/dev/null; then
+    fail "$key is set again (two startup terminals / relaunch warning would return)"
+  else
+    ok "$key is not set"
+  fi
+done
 
 # ---- verdict ------------------------------------------------------------
 if [[ "$fails" -gt 0 ]]; then

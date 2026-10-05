@@ -99,28 +99,28 @@
   //   revert the offending commit upstream ASAP — that fixes all subsequent
   //   creates immediately, with no image rebuild or pin bump needed.
 
-  // "Setup complete" signal + onboarding, via postAttachCommand — NOT
-  // postStartCommand. This distinction is the whole point: in Codespaces,
-  // postStartCommand (and postCreateCommand) output is routed to the hidden
-  // creation log, so a banner there is invisible — students finish the wait
-  // staring at a bare prompt. postAttachCommand runs in a VISIBLE terminal,
-  // and the lifecycle order (postCreate → postStart → postAttach) means it
-  // fires after any create-time work — so if the postCreateCommand above is
-  // ever revived, the banner stays a true "ready" signal. The banner shows
-  // ONE next action (`connect-repo <name>` — welcome.sh installs that
-  // wrapper on PATH); STUDENT_WORKFLOW.md is taught in class, deliberately
-  // neither linked in the banner nor auto-opened.
-  // Absolute path via ${containerWorkspaceFolder} so it still resolves after a
-  // student switches their open folder to their own repo. See welcome.sh.
+  // One-time per-Codespace setup (setup.sh): installs the `connect-repo`
+  // wrapper on PATH, the short beginner prompt, and a ~/.bashrc hook that
+  // prints the "YOUR CODESPACE IS READY" banner (welcome.sh) in the terminal
+  // Codespaces opens on its own. onCreateCommand runs at PREBUILD time (or at
+  // create when no prebuild is available), so all of it is in place before
+  // the first terminal exists; its output goes to the hidden creation log,
+  // which is fine because it prints nothing students need.
   //
-  // Object form (not a bare string) so the terminal tab is labeled with the
-  // short key instead of the full command line — Codespaces names the
-  // postAttach terminal after this string. Still a single command; the object
-  // form here is purely for the label. The platform prepends "Codespaces: ",
-  // so the tab reads "Codespaces: Welcome!" — the prefix is not removable.
-  "postAttachCommand": {
-    "Welcome!": "bash ${containerWorkspaceFolder}/.devcontainer/welcome.sh"
-  },
+  // ONE terminal, by design (2026-10). Until then the banner came from a
+  // postAttachCommand, which runs in a visible terminal — but that terminal
+  // was a SECOND one ("Codespaces: Welcome!") beside the default "bash" one
+  // Codespaces creates before any extension activates. Students asked why
+  // there were two; the default one carried a "⚠ extensions want to relaunch
+  // the terminal" warning that no setting suppresses (hideOnStartup did not
+  // prevent it — verified 2026-09-17); and the image needed a first-run notice
+  // to bridge the gap before postAttach fired. Printing from .bashrc in the
+  // default terminal removes all three. The banner shows ONE next action;
+  // STUDENT_WORKFLOW.md is taught in class, deliberately neither linked in
+  // the banner nor auto-opened.
+  // Absolute path via ${containerWorkspaceFolder} so it resolves regardless of
+  // the folder the student later opens. See setup.sh and welcome.sh.
+  "onCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/setup.sh",
 
   "customizations": {
     "vscode": {
@@ -241,33 +241,17 @@
         // just the final output.
         "r.source.echo": true,
 
-        // Don't auto-relaunch terminals when extensions contribute environment
-        // variables after startup. A relaunch clears scrollback, and if it hit
-        // the postAttach terminal it would wipe the welcome banner — the whole
-        // point of welcome.sh. NOTE: this setting does NOT suppress the "⚠
-        // extensions want to relaunch the terminal" indicator — it CAUSES it
-        // (with auto-relaunch off, VS Code surfaces the pending changes as a
-        // warning instead). The indicator is hidden separately below.
-        "terminal.integrated.environmentChangesRelaunch": false,
-
-        // Hide that ⚠ relaunch indicator. Pure noise for students: git auth in
-        // Codespaces terminals comes from the container's global credential
-        // helper (not the extension-injected env vars this warns about), we
-        // deliberately blank GITHUB_TOKEN/GH_TOKEN in terminals anyway (see
-        // terminal.integrated.env.linux above), and terminals opened after
-        // startup get the contributed environment normally.
-        "terminal.integrated.environmentChangesIndicator": "off",
-
-        // Don't auto-create VS Code's default terminal at startup. Students
-        // were getting TWO terminals ("bash" + "Codespaces: Welcome!") and
-        // asking why; the default one is also the one that carries the
-        // "⚠ extensions want to relaunch" warning, because it is created
-        // before the Git/Codespaces extensions activate and no setting can
-        // suppress that contribution (verified 2026-09-17). The Welcome
-        // terminal is created explicitly by the Codespaces extension for
-        // postAttachCommand and is unaffected. If a fresh Codespace ever
-        // shows NO terminal and no banner, revert this one line.
-        "terminal.integrated.hideOnStartup": "always",
+        // DELIBERATELY ABSENT (removed 2026-10 with the one-terminal design):
+        // terminal.integrated.environmentChangesRelaunch, …environmentChanges-
+        // Indicator and …hideOnStartup. The first two existed to keep a
+        // relaunch from wiping the banner out of the postAttach terminal and
+        // to hide the ⚠ that turning relaunch off CAUSES; the third hid the
+        // default terminal so students saw only the Welcome one (it didn't:
+        // the Codespaces client creates it regardless). With the banner
+        // printed from ~/.bashrc, VS Code's default silent relaunch of a
+        // not-yet-used terminal simply re-runs .bashrc and reprints the
+        // banner — no warning, no lost output, one terminal. Do not re-add
+        // any of the three without re-reading setup.sh's history note.
 
         // NOTE — we want to suppress VS Code's Welcome / "Get Started" tab,
         // but there is currently NO way to do it from here. The setting that
@@ -278,8 +262,17 @@
         // Codespaces (see microsoft/vscode#134073, #160635, #242243) — it was
         // removed rather than left as dead config that looks like it works.
         // Revisit if that bug is ever fixed. We don't fight it further: the VS
-        // Code Welcome tab is left as-is, and postAttachCommand prints a ready
-        // banner (welcome.sh) pointing students to .devcontainer/STUDENT_WORKFLOW.md.
+        // Code Welcome tab is left as-is, and the ready banner (welcome.sh)
+        // in the terminal tells students the one thing to do next.
+        //
+        // Likewise ABSENT: anything about Workspace Trust. Every
+        // security.workspace.trust.* setting is application-scoped too, read
+        // only from the browser-side user settings — nothing bakeable here,
+        // in the image, or in a script can stop the "Do you trust the
+        // authors?" modal (vscode workspace.contribution.ts; the 2026-08
+        // "fix" was a false positive). Students click "Trust Folder &
+        // Continue", twice: at start and again after connect-repo's Open
+        // Folder. Do not spend more time on this.
 
         // Auto-stage all changes on commit so students don't get a confusing
         // dialog asking whether to stage files.
@@ -291,13 +284,14 @@
         // Don't inject VS Code's git-askpass into terminals (GIT_ASKPASS and
         // friends). Terminal git auth here comes from the container's
         // credential store, which connect-repo sets up (`credential.helper
-        // store` + the student's token) — VS Code's injection is redundant AND
-        // is one of the two extensions that make the first terminal show the
-        // "⚠ extensions want to relaunch the terminal" warning (the other is
-        // the closed-source GitHub Codespaces extension, no known knob). The
-        // Source Control panel's own auth is a separate setting
-        // (github.gitAuthentication) and is untouched. Verify after any change:
-        // `connect-repo` end to end, then a terminal `git push`.
+        // store` + the student's token) — VS Code's injection is redundant.
+        // (It was also one of the two extensions behind the old "⚠ extensions
+        // want to relaunch the terminal" warning; the GitHub Codespaces
+        // extension is the other, and with relaunch back at its default the
+        // warning no longer appears for either.) The Source Control panel's
+        // own auth is a separate setting (github.gitAuthentication) and is
+        // untouched. Verify after any change: `connect-repo` end to end, then
+        // a terminal `git push`.
         "git.terminalAuthentication": false,
 
         // Fetch from the remote in the background. This was `false` (2026-07,

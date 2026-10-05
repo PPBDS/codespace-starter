@@ -205,19 +205,20 @@ if ! $no_agents && [[ ! -e "/workspaces/$dir/AGENTS.md" ]]; then
 fi
 
 # NOTE: we deliberately do NOT seed a .vscode/settings.json into the new repo.
-# The devcontainer's settings (arf R console, autosave, git.autofetch off, …)
-# are applied at the Codespace's *Machine* scope, which DOES carry over to any
+# The devcontainer's settings (arf R console, autosave, git.autofetch, …) are
+# applied at the Codespace's *Machine* scope, which DOES carry over to any
 # folder the student opens in this Codespace — verified by launching an R
 # console in a fresh repo with no settings file and seeing /usr/local/bin/arf
-# run. (The earlier "git fetch automatically?" prompt was Restricted Mode, now
-# handled by disabling Workspace Trust in welcome.sh — not a missing copy.) So
-# a seeded file was pure redundancy, and worse: it left a confusing settings
-# file in an otherwise-empty new repo.
+# run. So a seeded file was pure redundancy, and worse: it left a confusing
+# settings file in an otherwise-empty new repo. (An earlier version of this
+# note blamed Restricted Mode for the "git fetch automatically?" prompt and
+# claimed welcome.sh disabled Workspace Trust; both were wrong — see
+# devcontainer.json's git.autofetch and Workspace Trust comments.)
 
 # 5. Record that this student now has a work repo, so the welcome banner
-#    switches from "create a project" to "here's your project." postAttachCommand
-#    always runs in the codespace-starter folder, so the banner can't detect the
-#    move by directory — it reads this marker instead.
+#    (welcome.sh, run from ~/.bashrc in every new terminal) stops printing.
+#    It runs from the launcher checkout regardless of the current folder, so
+#    it can't detect progress by directory — it reads this marker instead.
 echo "$dir" > "$HOME/.student_repo"
 
 # 6. Best-effort: ask VS Code to switch the Explorer to the new repo. Codespaces
@@ -227,6 +228,14 @@ echo "$dir" > "$HOME/.student_repo"
 if command -v code >/dev/null 2>&1; then
   code -r "/workspaces/$dir" >/dev/null 2>&1 || true
 fi
+
+# 6b. Say, in one line, what is now connected to what — the whole point of
+#     this script. The path is where the student works; the URL is the GitHub
+#     repo it saves to (read from git so it is never wrong about the owner —
+#     an owner/<name> argument clones someone else's repo).
+origin="$(git -C "/workspaces/$dir" remote get-url origin 2>/dev/null || true)"
+origin="${origin%.git}"
+printf '\n   ✅  Connected: /workspaces/%s%s\n\n' "$dir" "${origin:+  →  ${origin}}"
 
 # 7. Put THIS terminal in the repo too. Steps 2b and 6 only fix NEW terminals
 #    and the Explorer; the terminal that ran this script is still sitting in

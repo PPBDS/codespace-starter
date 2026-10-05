@@ -17,7 +17,7 @@
   // so KEEP this note). Also note: an ordinary push to main touching this
   // file does not reliably fire a prebuild either — the 2026-08-11 "better
   // start up" push never triggered one.)
-  // The PPBDS image, pinned to v1.1.6. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.1.7. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -33,10 +33,12 @@
   // Also PPBDS/primer's .devcontainer pins this image. If those pins lag,
   // their CI validates against an image students no longer run.
   //
-  // Bakes in: gh, quarto, arf (Rust R console), httpgd, pak,
+  // Bakes in: every VS Code extension listed below (so nothing installs at
+  // attach), gh, quarto, arf (Rust R console), httpgd, pak,
   // tutorial.helpers, vscode.tutorials, misc.tutorials, primer.tutorials,
   // learnr2 (what the baked R Tutorials extension, 1.1.0+, lists and runs
-  // tutorials through),
+  // tutorials through), sess (vscode-R 3.x's session bridge, baked at the
+  // exact version the baked extension bundles),
   // an images + animation set (magick/rsvg/webp/png/jpeg, ggimage/
   // ggpattern/ggfx, gganimate with gifski + av, transformr, camcorder; and
   // Pillow/scikit-image/imageio on the Python side, plus the ffmpeg CLI),
@@ -70,7 +72,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.1.6",
+  "image": "ghcr.io/ppbds/devcontainer:1.1.7",
 
   // NO postCreateCommand right now — RETIRED 2026-07-30. All course
   // packages, including primer.tutorials, ship at whatever versions the
@@ -151,16 +153,21 @@
       // attach-time install needed a window reload. Ship a new version by
       // bumping RT_EXT_VERSION there and cutting an image release.
       "extensions": [
-        // PINNED to 2.8.8 on purpose (2026-08-14). vscode-R 3.0.0 (in rc as
-        // of May 2026) replaces the session-watcher architecture with a
-        // bundled "sess" R package the image does not bake — an unpinned
-        // extension would auto-update every student Codespace the day it
-        // hits the Marketplace, breaking plotting with an install prompt
-        // students won't understand. Migrate DELIBERATELY: bake sess in the
-        // image, bump this pin, and drop the image's Rprofile.site .First
-        // shim (which 3.0.0 makes obsolete) in the same release. See
-        // REditorSupport/vscode-R#1696 for the R-4.6 background.
-        "reditorsupport.r@2.8.8",
+        // vscode-R, PINNED to the version the image bakes (3.0.1 since image
+        // v1.1.7 — the 3.0 migration). Keep this in lockstep with
+        // VSCODE_R_VERSION in the PPBDS/devcontainers Dockerfile: the image
+        // bakes this exact .vsix AND the `sess` R package bundled inside it,
+        // which 3.x needs to attach to an R session (plots, workspace
+        // viewer). A different version here would install over the baked one
+        // and, if its bundled sess is newer, prompt every student to install
+        // sess. An UNPINNED entry would auto-update every Codespace the day a
+        // new release hits the Marketplace — exactly how 2.8.8 → 3.0.1 broke
+        // plots on a synced account on 2026-10-05 (Rplots.pdf, no error).
+        // Since v1.1.7 every extension in this list is also baked in the
+        // image (see the Dockerfile), so VS Code finds them installed and
+        // installs nothing at attach; the list stays so the pins are
+        // declared where VS Code reads them.
+        "reditorsupport.r@3.0.1",
         "quarto.quarto",
         "ritwickdey.LiveServer",
         "tomoki1207.pdf",
@@ -230,15 +237,30 @@
         // provides for exactly this purpose (see the Dockerfile in
         // PPBDS/devcontainers), NOT the real /home/rstudio/.cargo/bin/arf
         // path — that way a change to the image's default user only touches
-        // that Dockerfile, not this consumer setting.
-        "r.rterm.linux": "/usr/local/bin/arf",
+        // that Dockerfile, not this consumer setting. (vscode-R 3.0 renamed
+        // this from the per-platform r.rterm.linux, now deprecated; the
+        // vanilla-R path for background processes, r.executablePath, is left
+        // at its default, which resolves `R` from PATH.)
+        "r.consolePath": "/usr/local/bin/arf",
 
         // Required for arf-style consoles to handle pasted code correctly.
         "r.bracketedPaste": true,
 
-        // Render plots inside VS Code via the httpgd graphics device
-        // instead of opening an external window (which doesn't work in Codespaces).
-        "r.plot.useHttpgd": true,
+        // Render plots inside VS Code via the httpgd graphics device instead
+        // of opening an external window (which doesn't work in Codespaces).
+        // vscode-R 3.0 replaced the boolean r.plot.useHttpgd (deprecated)
+        // with a backend choice; "auto" would prefer jgd when installed, so
+        // name httpgd explicitly — it is what the image bakes and what every
+        // tutorial was written against.
+        "r.plot.backend": "httpgd",
+
+        // Close VS Code's Welcome tab once the window has started, so the
+        // editor area is empty and the terminal with the banner is what
+        // students see (David, 2026-10-05). The setting that would stop the
+        // tab opening, workbench.startupEditor, is application-scoped and
+        // ignored here (see the note further down), so our own R Tutorials
+        // extension (baked, >= 1.2.0) does the closing when this is on.
+        "rTutorials.closeWelcomeOnStartup": true,
 
         // Make the "Run Source" button (the ▷ in the editor title bar) and its
         // Ctrl/Cmd+Shift+S shortcut run source(FILE, echo = TRUE) instead of a
@@ -284,9 +306,9 @@
         // "workbench.startupEditor": "none" line here is a confirmed no-op in
         // Codespaces (see microsoft/vscode#134073, #160635, #242243) — it was
         // removed rather than left as dead config that looks like it works.
-        // Revisit if that bug is ever fixed. We don't fight it further: the VS
-        // Code Welcome tab is left as-is, and the ready banner (welcome.sh)
-        // in the terminal tells students the one thing to do next.
+        // Revisit if that bug is ever fixed. Since image v1.1.7 the tab is
+        // instead CLOSED right after startup by the baked R Tutorials
+        // extension (rTutorials.closeWelcomeOnStartup above).
         //
         // Likewise ABSENT: anything about Workspace Trust. Every
         // security.workspace.trust.* setting is application-scoped too, read

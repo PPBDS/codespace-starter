@@ -1,4 +1,4 @@
-# Launcher tests: run welcome.sh and the connect-repo wrapper inside the SAME
+# Launcher tests: run setup.sh, welcome.sh and the connect-repo wrapper inside the SAME
 # pinned image students get, and assert the banner, wrapper, and usage paths
 # behave (see .devcontainer/tests/launcher-tests.sh for exactly what's
 # covered, and what deliberately isn't — anything needing a GitHub login).
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - run: shellcheck .devcontainer/welcome.sh .devcontainer/connect-repo.sh .devcontainer/tests/launcher-tests.sh
+      - run: shellcheck .devcontainer/setup.sh .devcontainer/welcome.sh .devcontainer/connect-repo.sh .devcontainer/tests/launcher-tests.sh
 
   test:
     needs: pin

@@ -229,10 +229,25 @@ if grep -qF '"r.consolePath": "/usr/local/bin/arf"' "$here/devcontainer.json" \
 else
   fail "r.consolePath / r.plot.backend / rTutorials.closeWelcomeOnStartup missing"
 fi
-if grep -qE '"reditorsupport\.r@[0-9]+\.[0-9]+\.[0-9]+"' "$here/devcontainer.json"; then
-  ok "vscode-R is version-pinned"
+pinned="$(grep -oE '"reditorsupport\.r@[0-9]+\.[0-9]+\.[0-9]+"' "$here/devcontainer.json" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+if [[ -n "$pinned" ]]; then
+  ok "vscode-R is version-pinned ($pinned)"
 else
   fail "vscode-R is not version-pinned (an unpinned entry auto-updates and can break plots)"
+fi
+# Lockstep with the image (Copilot, PR #57): the pin must be the version the
+# image BAKES — that .vsix is where the baked sess package came from, so any
+# other version risks the "install sess?" prompt. Only checkable inside the
+# image (CI); skipped on a laptop.
+baked_dir="/home/rstudio/.vscode-remote/extensions"
+if [[ -d "$baked_dir" && -n "$pinned" ]]; then
+  if [[ -d "$baked_dir/reditorsupport.r-$pinned" ]]; then
+    ok "image bakes the pinned vscode-R ($pinned)"
+  else
+    fail "pinned vscode-R $pinned is not what the image bakes: $(ls "$baked_dir" | grep -E '^reditorsupport\.r-' | tr '\n' ' ')"
+  fi
+else
+  ok "image lockstep check skipped (not running inside the image)"
 fi
 if grep -qF '"terminal.integrated.initialHint": false' "$here/devcontainer.json"; then
   ok "terminal initial hint (Copilot CLI ghost text) is off"

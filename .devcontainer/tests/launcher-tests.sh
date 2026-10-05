@@ -204,9 +204,11 @@ if grep -qF '"onCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/
 else
   fail "onCreateCommand does not run setup.sh (nothing would install the banner hook)"
 fi
-for key in postAttachCommand terminal.integrated.hideOnStartup terminal.integrated.environmentChangesRelaunch; do
+# (environmentChangesIndicator is in this list because VS Code deleted the
+# setting in 2025-10; re-adding it would be dead config.)
+for key in postAttachCommand terminal.integrated.hideOnStartup terminal.integrated.environmentChangesRelaunch terminal.integrated.environmentChangesIndicator; do
   if grep -E "^\s*\"$key\"" "$here/devcontainer.json" >/dev/null; then
-    fail "$key is set again (two startup terminals / relaunch warning would return)"
+    fail "$key is set again (two startup terminals / dead relaunch config would return)"
   else
     ok "$key is not set"
   fi
@@ -215,11 +217,6 @@ if grep -qF '"terminal.integrated.initialHint": false' "$here/devcontainer.json"
   ok "terminal initial hint (Copilot CLI ghost text) is off"
 else
   fail "terminal.integrated.initialHint is not false (the Copilot CLI hint would return)"
-fi
-if grep -qF '"terminal.integrated.environmentChangesIndicator": "off"' "$here/devcontainer.json"; then
-  ok "relaunch indicator is off (retry; remove this guard if the retry fails live)"
-else
-  fail "terminal.integrated.environmentChangesIndicator is not off"
 fi
 
 # ---- verdict ------------------------------------------------------------

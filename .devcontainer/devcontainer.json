@@ -257,20 +257,17 @@
         // this), so relaunch stays at its default. Do not re-add either
         // without re-reading setup.sh's history note.
 
-        // Hide the "⚠ extensions want to relaunch the terminal" indicator on
-        // the first terminal. It shows there because the Codespaces client
-        // creates that terminal before the Git and GitHub Codespaces
-        // extensions activate, and VS Code does NOT auto-relaunch
-        // extension-created terminals (verified 2026-10-05: the icon stayed
-        // with relaunch at its default). The contribution it warns about is
-        // irrelevant here — git auth comes from the container's credential
-        // store, and GITHUB_TOKEN/GH_TOKEN are blanked anyway (see
-        // terminal.integrated.env.linux). This is a RETRY: "off" was tried
-        // in 2026-08 with environmentChangesRelaunch=false and reported not
-        // to help; conditions differ now. If the ⚠ still shows with this
-        // line present, remove it and accept the icon — there is no other
-        // knob.
-        "terminal.integrated.environmentChangesIndicator": "off",
+        // The "⚠ extensions want to relaunch the terminal" icon on the FIRST
+        // terminal is ACCEPTED — there is no knob (closed 2026-10-05). It
+        // shows because the Codespaces client creates that terminal before
+        // the Git and GitHub Codespaces extensions activate, and VS Code
+        // does not auto-relaunch extension-created terminals. The only
+        // setting that ever hid it, terminal.integrated.environmentChanges-
+        // Indicator, was REMOVED from VS Code on 2025-10-08 (microsoft/vscode
+        // 0d826f5) — which is why setting it "off" in 2026-08 did nothing.
+        // Harmless: the contribution it warns about is irrelevant here (git
+        // auth comes from the container's credential store, and
+        // GITHUB_TOKEN/GH_TOKEN are blanked anyway). Do not try again.
 
         // No "Type copilot to use Copilot CLI. Don't show this again" ghost
         // text in an empty terminal. That is VS Code's terminal initial

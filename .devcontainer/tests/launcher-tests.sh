@@ -53,7 +53,13 @@ else
   ok "no trust setting written"
 fi
 
-# ---- welcome.sh with no marker: banner ----------------------------------
+# ---- welcome.sh with no markers: banner ---------------------------------
+# The "shown" marker is normally touched 10 s after printing; the tests set
+# the delay to 0 so it lands immediately, and clear it before every run that
+# expects a banner.
+shown="$HOME/.config/codespace-starter/banner-shown"
+export CODESPACE_STARTER_BANNER_DELAY=0
+rm -f "$shown"
 if ! out="$(bash "$here/welcome.sh")"; then
   fail "welcome.sh exited non-zero"
 fi
@@ -88,16 +94,42 @@ else
   ok "banner has no clear-hint"
 fi
 
+# ---- banner once: the "shown" marker ------------------------------------
+# Printing must schedule the marker (delay 0 here, so it lands at once), and
+# the marker must silence every later run — this is "banner only in the
+# first terminal" (David, 2026-10-05).
+sleep 1
+if [[ -f "$shown" ]]; then
+  ok "shown marker written after the banner printed"
+else
+  fail "shown marker missing after the banner printed: $shown"
+fi
+out_again="$(bash "$here/welcome.sh")"
+if [[ -z "$out_again" ]]; then
+  ok "welcome.sh is silent once the shown marker exists"
+else
+  fail "welcome.sh printed again despite the shown marker: $out_again"
+fi
+
 # ---- the .bashrc hook end to end ----------------------------------------
 # An interactive bash with this HOME must print the banner from the hook
 # setup.sh installed — this is the whole delivery path now that there is no
 # postAttach terminal. (-i without a tty makes bash grumble on stderr about
-# job control; that is noise, hence 2>/dev/null.)
+# job control; that is noise, hence 2>/dev/null.) Then, with the marker it
+# just wrote, a second interactive shell must be clean.
+rm -f "$shown"
 hook_out="$(bash -ic 'true' 2>/dev/null || true)"
 if grep -q "YOUR CODESPACE IS READY" <<<"$hook_out"; then
-  ok "interactive shell prints the banner via the .bashrc hook"
+  ok "first interactive shell prints the banner via the .bashrc hook"
 else
   fail "interactive shell did not print the banner (hook broken?)"
+fi
+sleep 1
+hook_out_2="$(bash -ic 'true' 2>/dev/null || true)"
+if grep -q "YOUR CODESPACE IS READY" <<<"$hook_out_2"; then
+  fail "second interactive shell printed the banner again"
+else
+  ok "second interactive shell is clean"
 fi
 
 # ---- wrapper ------------------------------------------------------------
@@ -127,6 +159,7 @@ fi
 # connect-repo reports the connected repo itself; once its marker exists the
 # banner must print nothing at all, in the hook and when run directly.
 echo "test-repo" > "$HOME/.student_repo"
+rm -f "$shown"
 out2="$(bash "$here/welcome.sh")"
 if [[ -z "$out2" ]]; then
   ok "welcome.sh is silent once the marker exists"
@@ -171,13 +204,23 @@ if grep -qF '"onCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/
 else
   fail "onCreateCommand does not run setup.sh (nothing would install the banner hook)"
 fi
-for key in postAttachCommand terminal.integrated.hideOnStartup terminal.integrated.environmentChangesRelaunch terminal.integrated.environmentChangesIndicator; do
+for key in postAttachCommand terminal.integrated.hideOnStartup terminal.integrated.environmentChangesRelaunch; do
   if grep -E "^\s*\"$key\"" "$here/devcontainer.json" >/dev/null; then
     fail "$key is set again (two startup terminals / relaunch warning would return)"
   else
     ok "$key is not set"
   fi
 done
+if grep -qF '"terminal.integrated.initialHint": false' "$here/devcontainer.json"; then
+  ok "terminal initial hint (Copilot CLI ghost text) is off"
+else
+  fail "terminal.integrated.initialHint is not false (the Copilot CLI hint would return)"
+fi
+if grep -qF '"terminal.integrated.environmentChangesIndicator": "off"' "$here/devcontainer.json"; then
+  ok "relaunch indicator is off (retry; remove this guard if the retry fails live)"
+else
+  fail "terminal.integrated.environmentChangesIndicator is not off"
+fi
 
 # ---- verdict ------------------------------------------------------------
 if [[ "$fails" -gt 0 ]]; then

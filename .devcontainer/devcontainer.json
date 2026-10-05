@@ -247,16 +247,37 @@
         "r.source.echo": true,
 
         // DELIBERATELY ABSENT (removed 2026-10 with the one-terminal design):
-        // terminal.integrated.environmentChangesRelaunch, …environmentChanges-
-        // Indicator and …hideOnStartup. The first two existed to keep a
-        // relaunch from wiping the banner out of the postAttach terminal and
-        // to hide the ⚠ that turning relaunch off CAUSES; the third hid the
-        // default terminal so students saw only the Welcome one (it didn't:
-        // the Codespaces client creates it regardless). With the banner
-        // printed from ~/.bashrc, VS Code's default silent relaunch of a
-        // not-yet-used terminal simply re-runs .bashrc and reprints the
-        // banner — no warning, no lost output, one terminal. Do not re-add
-        // any of the three without re-reading setup.sh's history note.
+        // terminal.integrated.environmentChangesRelaunch and …hideOnStartup.
+        // The first existed to keep a relaunch from wiping the banner out of
+        // the postAttach terminal (and turning it off is what CAUSED the ⚠
+        // indicator); the second hid the default terminal so students saw
+        // only the Welcome one (it didn't: the Codespaces client creates it
+        // regardless). With the banner printed from ~/.bashrc a relaunch
+        // just reprints it (welcome.sh delays its "shown" marker for exactly
+        // this), so relaunch stays at its default. Do not re-add either
+        // without re-reading setup.sh's history note.
+
+        // Hide the "⚠ extensions want to relaunch the terminal" indicator on
+        // the first terminal. It shows there because the Codespaces client
+        // creates that terminal before the Git and GitHub Codespaces
+        // extensions activate, and VS Code does NOT auto-relaunch
+        // extension-created terminals (verified 2026-10-05: the icon stayed
+        // with relaunch at its default). The contribution it warns about is
+        // irrelevant here — git auth comes from the container's credential
+        // store, and GITHUB_TOKEN/GH_TOKEN are blanked anyway (see
+        // terminal.integrated.env.linux). This is a RETRY: "off" was tried
+        // in 2026-08 with environmentChangesRelaunch=false and reported not
+        // to help; conditions differ now. If the ⚠ still shows with this
+        // line present, remove it and accept the icon — there is no other
+        // knob.
+        "terminal.integrated.environmentChangesIndicator": "off",
+
+        // No "Type copilot to use Copilot CLI. Don't show this again" ghost
+        // text in an empty terminal. That is VS Code's terminal initial
+        // hint; "Don't show this again" sets exactly this key. Window-scoped
+        // (terminalInitialHintConfiguration.ts), so unlike the trust and
+        // startup-editor settings it IS honored from here.
+        "terminal.integrated.initialHint": false,
 
         // NOTE — we want to suppress VS Code's Welcome / "Get Started" tab,
         // but there is currently NO way to do it from here. The setting that

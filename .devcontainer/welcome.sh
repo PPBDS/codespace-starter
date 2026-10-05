@@ -3,10 +3,21 @@
 # welcome.sh — the "your Codespace is ready" banner.
 #
 # Run by a hook at the end of ~/.bashrc (installed by setup.sh from
-# onCreateCommand), so it prints in the first terminal Codespaces opens — and
-# in every later interactive terminal — until the student has run
-# connect-repo. After that it prints nothing: connect-repo drops a marker
-# (~/.student_repo) and reports the connected repo itself.
+# onCreateCommand), so it prints in the FIRST terminal Codespaces opens, and
+# only there: later terminals start clean (David, 2026-10-05). Two markers
+# make it quiet:
+#   - ~/.student_repo (written by connect-repo): the student has a repo, so
+#     there is nothing to say; connect-repo reports the connected repo itself.
+#   - ~/.config/codespace-starter/banner-shown: the banner has been printed
+#     once in this Codespace. It is touched TEN SECONDS after printing, from
+#     a detached background sleep, not immediately — the same trick the
+#     devcontainers base uses for its first-run notice — so that if VS Code
+#     silently relaunches the first terminal a few seconds in (it does that
+#     when extensions contribute environment variables, and the relaunch
+#     wipes the scrollback), the re-run .bashrc prints the banner again
+#     instead of leaving a blank terminal. Any terminal opened later than
+#     that is clean. (Tests shorten the delay via
+#     CODESPACE_STARTER_BANNER_DELAY.)
 #
 # Why .bashrc and not a postAttachCommand (the design until 2026-10): a
 # postAttach terminal is a SECOND terminal beside the one Codespaces opens on
@@ -21,9 +32,18 @@ set -uo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # codespace-starter/.devcontainer
 marker="$HOME/.student_repo"
+shown="$HOME/.config/codespace-starter/banner-shown"
 
-# Once connect-repo has run, there is nothing to say.
-[[ -f "$marker" ]] && exit 0
+# Once connect-repo has run, or once the banner has had its one showing,
+# there is nothing to say.
+[[ -f "$marker" || -f "$shown" ]] && exit 0
+
+# Schedule the "shown" marker (see the header for why it is delayed). The
+# doubled parentheses detach the sleeper from the interactive shell's job
+# control so the student never sees a "[1]+ Done" line. Best-effort: if the
+# directory can't be made, the banner simply shows again next time.
+mkdir -p "$(dirname "$shown")" 2>/dev/null && \
+  ( ( sleep "${CODESPACE_STARTER_BANNER_DELAY:-10}"; touch "$shown" ) >/dev/null 2>&1 & )
 
 # The banner advertises the short command ONLY if the wrapper really landed
 # (setup.sh is deliberately non-fatal, so a failed install there must not

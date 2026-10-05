@@ -55,16 +55,15 @@ PS1='\W \$ '
 BASHRC
 fi
 
-# 3. The banner hook: every interactive shell runs welcome.sh, which prints the
-#    ready banner until connect-repo has been run (it reads ~/.student_repo
-#    and prints nothing once that marker exists). Gated on an interactive
-#    shell only — the R console (arf) is launched directly, not via bash, so
-#    it never sees this; task terminals are non-interactive. VS Code may
-#    silently relaunch the first terminal once extensions have activated
-#    (the default behavior); that re-runs .bashrc and simply reprints the
-#    banner, which is exactly what we want. The path is baked in absolute via
-#    %q so the hook keeps working from any folder the student switches to.
-#    Idempotent via the sentinel.
+# 3. The banner hook: every interactive shell runs welcome.sh, and welcome.sh
+#    decides whether to print — once per Codespace (its own "shown" marker,
+#    delayed ten seconds to survive a VS Code relaunch of the first
+#    terminal) and never after connect-repo (~/.student_repo). All of that
+#    logic lives in welcome.sh so this hook stays a one-liner. Gated on an
+#    interactive shell only — the R console (arf) is launched directly, not
+#    via bash, so it never sees this; task terminals are non-interactive. The
+#    path is baked in absolute via %q so the hook keeps working from any
+#    folder the student switches to. Idempotent via the sentinel.
 if ! grep -qF 'codespace-starter:banner' "$bashrc" 2>/dev/null; then
   {
     printf '\n# codespace-starter:banner — the "your Codespace is ready" banner (see .devcontainer/welcome.sh).\n'

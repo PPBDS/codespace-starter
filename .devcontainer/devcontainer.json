@@ -17,7 +17,7 @@
   // so KEEP this note). Also note: an ordinary push to main touching this
   // file does not reliably fire a prebuild either — the 2026-08-11 "better
   // start up" push never triggered one.)
-  // The PPBDS image, pinned to v1.1.7. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.1.8. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -72,7 +72,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.1.7",
+  "image": "ghcr.io/ppbds/devcontainer:1.1.8",
 
   // NO postCreateCommand right now — RETIRED 2026-07-30. All course
   // packages, including primer.tutorials, ship at whatever versions the
@@ -261,6 +261,16 @@
         // ignored here (see the note further down), so our own R Tutorials
         // extension (baked, >= 1.2.0) does the closing when this is on.
         "rTutorials.closeWelcomeOnStartup": true,
+
+        // Word boundaries for R: treat `.` and `_` as parts of a name, so a
+        // double-click on `my_data.frame` selects the whole thing. This used
+        // to arrive invisibly via the rocker base image's r-rig feature
+        // metadata; image v1.1.8 stopped inheriting that metadata (it also
+        // smuggled in extensions), so the one setting worth keeping lives
+        // here, where it can be seen.
+        "[r]": {
+          "editor.wordSeparators": "`~!@#%$^&*()-=+[{]}\\|;:'\",<>/?"
+        },
 
         // Make the "Run Source" button (the ▷ in the editor title bar) and its
         // Ctrl/Cmd+Shift+S shortcut run source(FILE, echo = TRUE) instead of a

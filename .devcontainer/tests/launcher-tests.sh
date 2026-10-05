@@ -213,6 +213,27 @@ for key in postAttachCommand terminal.integrated.hideOnStartup terminal.integrat
     ok "$key is not set"
   fi
 done
+# vscode-R 3.0 settings (image v1.1.7+): the 2.x keys are deprecated and
+# r.plot.useHttpgd would silently lose to r.plot.backend; guard the rename.
+for key in r.rterm.linux r.plot.useHttpgd; do
+  if grep -E "^\s*\"$key\"" "$here/devcontainer.json" >/dev/null; then
+    fail "$key is back (deprecated in vscode-R 3.0; use r.consolePath / r.plot.backend)"
+  else
+    ok "$key is not set (3.0 rename)"
+  fi
+done
+if grep -qF '"r.consolePath": "/usr/local/bin/arf"' "$here/devcontainer.json" \
+   && grep -qF '"r.plot.backend": "httpgd"' "$here/devcontainer.json" \
+   && grep -qF '"rTutorials.closeWelcomeOnStartup": true' "$here/devcontainer.json"; then
+  ok "3.0 console/plot settings + Welcome-tab close are set"
+else
+  fail "r.consolePath / r.plot.backend / rTutorials.closeWelcomeOnStartup missing"
+fi
+if grep -qE '"reditorsupport\.r@[0-9]+\.[0-9]+\.[0-9]+"' "$here/devcontainer.json"; then
+  ok "vscode-R is version-pinned"
+else
+  fail "vscode-R is not version-pinned (an unpinned entry auto-updates and can break plots)"
+fi
 if grep -qF '"terminal.integrated.initialHint": false' "$here/devcontainer.json"; then
   ok "terminal initial hint (Copilot CLI ghost text) is off"
 else

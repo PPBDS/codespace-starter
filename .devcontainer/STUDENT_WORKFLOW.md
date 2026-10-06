@@ -11,6 +11,15 @@ tools travel with the Codespace, so your repo needs no setup of its own.
 > example, can float over other tabs and block clicks). Any Chromium-based
 > browser works correctly.
 
+## 0. First, click "Trust Folder & Continue"
+
+The moment a Codespace opens, VS Code asks **"Do you trust the authors of
+the files in this folder?"** Click **Trust Folder & Continue**. Until you do,
+the editor is in *Restricted Mode*: no terminal, and the R Tutorials icon and
+the other tools stay switched off. You'll be asked a second time after
+`connect-repo` opens your own repo — click it again. (There is no setting we
+can ship that answers this for you; it's VS Code's own safety check.)
+
 ## 1. Create or connect to your repo (one command)
 
 In the terminal:

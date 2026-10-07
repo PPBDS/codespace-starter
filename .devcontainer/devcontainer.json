@@ -17,7 +17,7 @@
   // so KEEP this note). Also note: an ordinary push to main touching this
   // file does not reliably fire a prebuild either — the 2026-08-11 "better
   // start up" push never triggered one.)
-  // The PPBDS image, pinned to v1.2.0. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.2.1. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -73,7 +73,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.2.0",
+  "image": "ghcr.io/ppbds/devcontainer:1.2.1",
 
   // NO postCreateCommand right now — RETIRED 2026-07-30. All course
   // packages, including primer.tutorials, ship at whatever versions the

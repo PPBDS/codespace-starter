@@ -6,7 +6,7 @@
 # The image tag is read LIVE from devcontainer.json by the first job, so this
 # workflow is NOT an extra location for the pin-bump checklist (the "bump it
 # everywhere" list in devcontainer.json / the devcontainers runbook stays at
-# six). The container runs as its default user (root), matching the tutorial
+# five). The container runs as its default user (root), matching the tutorial
 # repos' student-env jobs — a non-root user hits /github/home permission
 # problems in container jobs.
 name: launcher-tests

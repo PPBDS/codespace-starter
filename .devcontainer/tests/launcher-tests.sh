@@ -278,6 +278,21 @@ else
   fail "terminal.integrated.initialHint is not false (the Copilot CLI hint would return)"
 fi
 
+# ---- plumbing hidden from the Explorer (.vscode/settings.json) ----------
+# Workspace-scoped on purpose: the same setting in devcontainer.json would
+# hide .github in students' own repos as well.
+ws="$here/../.vscode/settings.json"
+if [[ -f "$ws" ]] && grep -qF '".github": true' "$ws" && grep -qF '".devcontainer/tests": true' "$ws"; then
+  ok ".github and .devcontainer/tests hidden via workspace settings"
+else
+  fail ".vscode/settings.json missing or no longer hides .github / .devcontainer/tests"
+fi
+if grep -qE '"files\.exclude"' "$here/devcontainer.json"; then
+  fail "files.exclude is in devcontainer.json — that would apply to students' own repos too"
+else
+  ok "files.exclude is not machine-wide"
+fi
+
 # ---- verdict ------------------------------------------------------------
 if [[ "$fails" -gt 0 ]]; then
   echo "LAUNCHER TESTS: $fails failure(s)" >&2

@@ -14,9 +14,9 @@ name: launcher-tests
 on:
   push:
     branches: [main]
-    paths: ['.devcontainer/**', '.github/workflows/launcher-tests.yml']
+    paths: ['.devcontainer/**', '.vscode/**', '.github/workflows/launcher-tests.yml']
   pull_request:
-    paths: ['.devcontainer/**', '.github/workflows/launcher-tests.yml']
+    paths: ['.devcontainer/**', '.vscode/**', '.github/workflows/launcher-tests.yml']
   workflow_dispatch:
 
 jobs:

@@ -75,6 +75,25 @@
   // not a bug. The built-in token is read-mostly outside the home repo.
   "image": "ghcr.io/ppbds/devcontainer:1.2.4",
 
+  // Forward the R tutorial server's port SILENTLY. learnr2::run_tutorial()
+  // (which the R Tutorials extension calls) always serves on port 7446 and
+  // opens the tutorial in a new browser tab itself, via VS Code's BROWSER
+  // helper. Without this entry, VS Code ALSO auto-forwards the new port with
+  // its default "notify" behaviour: an "Open in Browser" pop-up whose button
+  // opens the server's root page, which redirects to the same tutorial, so a
+  // student who clicks it gets the tutorial twice in two tabs. "silent" keeps
+  // the forwarding (the tutorial needs it) and drops only the pop-up. Do NOT
+  // use "ignore": that stops forwarding and the tutorial won't load.
+  // Classic learnr (.Rmd) tutorials run as Shiny apps on a random port, so
+  // this entry doesn't cover them; a broad port range would, but would also
+  // hide pop-ups for other tools students use (e.g. Live Server).
+  "portsAttributes": {
+    "7446": {
+      "label": "R tutorials",
+      "onAutoForward": "silent"
+    }
+  },
+
   // NO postCreateCommand right now — RETIRED 2026-07-30. All course
   // packages, including primer.tutorials, ship at whatever versions the
   // image baked; the live at-create refresh of primer.tutorials was removed

@@ -17,7 +17,7 @@
   // so KEEP this note). Also note: an ordinary push to main touching this
   // file does not reliably fire a prebuild either — the 2026-08-11 "better
   // start up" push never triggered one.)
-  // The PPBDS image, pinned to v1.2.5. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.2.6. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -37,7 +37,7 @@
   // attach), gh, quarto, arf (Rust R console), httpgd, pak,
   // vscode.tutorials, misc.tutorials, ims.tutorials (all Quarto tutorials
   // on learnr2; tutorial.helpers and primer.tutorials were dropped in
-  // v1.2.5), primer.data (for the primer book), learnr,
+  // v1.2.5), primer.data (for the primer book),
   // learnr2 (what the baked R Tutorials extension, 1.1.0+, lists and runs
   // tutorials through), sess (vscode-R 3.x's session bridge, baked at the
   // exact version the baked extension bundles),
@@ -74,7 +74,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.2.5",
+  "image": "ghcr.io/ppbds/devcontainer:1.2.6",
 
   // Forward the R tutorial server's port SILENTLY. learnr2::run_tutorial()
   // (which the R Tutorials extension calls) always serves on port 7446 and

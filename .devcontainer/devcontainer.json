@@ -408,7 +408,14 @@
         // Prevent VS Code from opening files in "preview" mode (italic
         // tab title) which silently replaces the tab when another file
         // is clicked. Beginners think their file vanished.
-        "workbench.editor.enablePreview": false
+        "workbench.editor.enablePreview": false,
+
+        // Default Live Server's root page to analysis.html, the course's
+        // standard rendered output (`quarto render analysis.qmd`), so
+        // "Go Live" shows the student's analysis instead of a directory
+        // listing. Applies in the student's own repo too, which is the
+        // point — that is where they use Live Server.
+        "liveServer.settings.file": "analysis.html"
       }
     }
   }

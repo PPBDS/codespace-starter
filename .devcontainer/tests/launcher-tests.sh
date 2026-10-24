@@ -272,6 +272,17 @@ if [[ -d "$baked_dir" && -n "$pinned" ]]; then
 else
   ok "image lockstep check skipped (not running inside the image)"
 fi
+# Live Server (image v1.3.1+): its ports are silenced because the image's
+# xdg-open opens the clicked file itself; the pop-up's button would open the
+# port root. Forwarding stays on (the tab is served through the forwarded
+# address), so "ignore" would break it — guard the exact value.
+if grep -qF '"5500-5510"' "$here/devcontainer.json" \
+   && awk '/"5500-5510"/{f=1} f&&/onAutoForward/{print; exit}' "$here/devcontainer.json" | grep -qF '"silent"' \
+   && grep -qF '"liveServer.settings.donotShowInfoMsg": true' "$here/devcontainer.json"; then
+  ok "Live Server ports silenced (not ignored) and its info box is off"
+else
+  fail "Live Server portsAttributes 5500-5510 silent / donotShowInfoMsg missing"
+fi
 if grep -qF '"terminal.integrated.initialHint": false' "$here/devcontainer.json"; then
   ok "terminal initial hint (Copilot CLI ghost text) is off"
 else

@@ -306,6 +306,19 @@
           "editor.wordSeparators": "`~!@#%$^&*()-=+[{]}\\|;:'\",<>/?"
         },
 
+        // Live Server opens its tab through the image's xdg-open (which, since
+        // image v1.3.1, builds the Codespaces forwarded address of the clicked
+        // file and hands it to VS Code's browser helper — issue #74). Name it
+        // EXPLICITLY: with no custom browser set, Live Server's default launch
+        // (the `opn` package resolving `xdg-open` itself from the extension
+        // host) never produced a tab, while this setting — which makes it
+        // spawn the given command with the URL — opens the file on every click
+        // (verified in a live Codespace, 2026-10-24, after the 1.3.1 rollout
+        // shipped without it and students got NO tab at all, since the port
+        // pop-up below was already silenced). The path is the image's stable
+        // stub, not a browser; do not point this at a browser name.
+        "liveServer.settings.AdvanceCustomBrowserCmdLine": "/usr/local/bin/xdg-open",
+
         // Live Server: no "Server is Started at port : 5500" info box on every
         // Go Live (the tab opening is the feedback). Its "Don't show again"
         // button sets exactly this key.

@@ -17,7 +17,7 @@
   // so KEEP this note). Also note: an ordinary push to main touching this
   // file does not reliably fire a prebuild either — the 2026-08-11 "better
   // start up" push never triggered one.)
-  // The PPBDS image, pinned to v1.3.2. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.3.3. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -74,7 +74,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.3.2",
+  "image": "ghcr.io/ppbds/devcontainer:1.3.3",
 
   // Forward the R tutorial server's port SILENTLY. learnr2::run_tutorial()
   // (which the R Tutorials extension calls) always serves on port 7446 and
@@ -187,8 +187,8 @@
       // attach-time install needed a window reload. Ship a new version by
       // bumping RT_EXT_VERSION there and cutting an image release.
       "extensions": [
-        // vscode-R, PINNED to the version the image bakes (3.2.0 since image
-        // v1.2.9; 3.0.1 from v1.1.7, the 3.0 migration). Keep this in lockstep with
+        // vscode-R, PINNED to the version the image bakes (3.2.1 since image
+        // v1.3.3; 3.2.0 from v1.2.9; 3.0.1 from v1.1.7, the 3.0 migration). Keep this in lockstep with
         // VSCODE_R_VERSION in the PPBDS/devcontainers Dockerfile: the image
         // bakes this exact .vsix AND the `sess` R package bundled inside it,
         // which 3.x needs to attach to an R session (plots, workspace
@@ -197,11 +197,17 @@
         // sess. An UNPINNED entry would auto-update every Codespace the day a
         // new release hits the Marketplace — exactly how 2.8.8 → 3.0.1 broke
         // plots on a synced account on 2026-10-05 (Rplots.pdf, no error).
+        // CAVEAT (2026-10-25): this pin chooses the version installed at
+        // create; it does NOT stop VS Code auto-updating the extension later.
+        // vscode-R 3.2.1 (stable, 2026-10-24) auto-updated over a baked 3.2.0
+        // and then rejected the baked sess ("installed sess does not match
+        // this build of vscode-R" at every R start). Image v1.3.3 bakes 3.2.1.
+        // Bump the image promptly when vscode-R ships a stable release.
         // Since v1.1.7 every extension in this list is also baked in the
         // image (see the Dockerfile), so VS Code finds them installed and
         // installs nothing at attach; the list stays so the pins are
         // declared where VS Code reads them.
-        "reditorsupport.r@3.2.0",
+        "reditorsupport.r@3.2.1",
         "quarto.quarto",
         "ritwickdey.LiveServer",
         "tomoki1207.pdf",

@@ -17,7 +17,7 @@
   // so KEEP this note). Also note: an ordinary push to main touching this
   // file does not reliably fire a prebuild either — the 2026-08-11 "better
   // start up" push never triggered one.)
-  // The PPBDS image, pinned to v1.3.4. Since v1.0.0 there is ONE image for
+  // The PPBDS image, pinned to v1.3.5. Since v1.0.0 there is ONE image for
   // the whole org (ghcr.io/ppbds/devcontainer — it replaced the old
   // devcontainers/base + /dev + /student trio, and additionally bakes the
   // package-development tooling: devtools, pkgdown, roxygen2, testthat,
@@ -25,13 +25,13 @@
   // `:latest` in student-facing config, since it would float silently with
   // every push to PPBDS/devcontainers.
   //
-  // WHEN BUMPING THIS PIN, bump it everywhere: the same tag is pinned in the
-  // CI of the tutorial package repos, where a "student-env-render" job
-  // renders every tutorial inside this exact image to prove it works for
-  // students. Currently: misc.tutorials, vscode.tutorials and
-  // ims.tutorials (each in .github/workflows/R-CMD-check.yaml).
-  // Also PPBDS/primer's .devcontainer pins this image. If those pins lag,
-  // their CI validates against an image students no longer run.
+  // WHEN BUMPING THIS PIN there is ONE other place: PPBDS/primer's
+  // .devcontainer pins this image too. The tutorial package repos
+  // (vscode.tutorials, misc.tutorials, ims.tutorials) no longer pin it:
+  // since 2026-10-31 their "student-env-render" CI job reads the tag from
+  // THIS file at run time, so they always render every tutorial inside the
+  // image students actually run (until then the tag was hardcoded in five
+  // places and bumped by hand).
   //
   // Bakes in: every VS Code extension listed below (so nothing installs at
   // attach), gh, quarto, arf (Rust R console), httpgd, pak,
@@ -74,7 +74,7 @@
   // OTHER repos (e.g., cloning a sibling package and pushing to it)
   // requires a one-time `gh auth login` per Codespace — that's by design,
   // not a bug. The built-in token is read-mostly outside the home repo.
-  "image": "ghcr.io/ppbds/devcontainer:1.3.4",
+  "image": "ghcr.io/ppbds/devcontainer:1.3.5",
 
   // Forward the R tutorial server's port SILENTLY. learnr2::run_tutorial()
   // (which the R Tutorials extension calls) always serves on port 7446 and
@@ -192,35 +192,31 @@
       // attach-time install needed a window reload. Ship a new version by
       // bumping RT_EXT_VERSION there and cutting an image release.
       "extensions": [
-        // vscode-R, PINNED to the version the image bakes (3.2.0 again since
-        // image v1.3.4 — 3.2.1 is broken, see below; 3.2.1 in v1.3.3; 3.2.0 from
-        // v1.2.9; 3.0.1 from v1.1.7, the 3.0 migration). Keep this in lockstep with
-        // VSCODE_R_VERSION in the PPBDS/devcontainers Dockerfile: the image
-        // bakes this exact .vsix AND the `sess` R package bundled inside it,
-        // which 3.x needs to attach to an R session (plots, workspace
-        // viewer). A different version here would install over the baked one
-        // and, if its bundled sess is newer, prompt every student to install
-        // sess. An UNPINNED entry would auto-update every Codespace the day a
-        // new release hits the Marketplace — exactly how 2.8.8 → 3.0.1 broke
-        // plots on a synced account on 2026-10-05 (Rplots.pdf, no error).
-        // CAVEAT (2026-10-25): this pin chooses the version installed at
-        // create; it does NOT stop VS Code auto-updating the extension later.
-        // vscode-R 3.2.1 (stable, 2026-10-24) auto-updated over the baked
-        // 3.2.0 and rejected the baked sess ("installed sess does not match
-        // this build of vscode-R"); v1.3.3 baked 3.2.1 to stop the prompt —
-        // and 3.2.1 turned out to have BROKEN plot and help viewers ("Plot
-        // refresh failed: TypeError: (void 0) is not a function"; an ejs
-        // dependency bump upstream). Since image v1.3.4 the image bakes 3.2.0
-        // again AND marks every baked extension pinned in the extensions
-        // directory's metadata, which is what VS Code's auto-update honours
-        // (extensions.autoUpdate itself is application-scoped, unsettable
-        // here). Extension updates are image releases; move to a newer
-        // vscode-R only once upstream has fixed the viewers.
+        // vscode-R, PINNED to the version the image bakes (3.2.2 since image
+        // v1.3.5; 3.2.0 in v1.2.9–v1.3.2 and v1.3.4; 3.0.1 from v1.1.7, the 3.0
+        // migration). Keep this in lockstep with VSCODE_R_VERSION in the
+        // PPBDS/devcontainers Dockerfile: the image bakes this exact .vsix AND
+        // the `sess` R package bundled inside it, which 3.x needs to attach to
+        // an R session (plots, workspace viewer). A different version here
+        // would install over the baked one and, if its bundled sess differs,
+        // prompt every student to install sess. An UNPINNED entry would
+        // auto-update every Codespace the day a new release hits the
+        // Marketplace — exactly how 2.8.8 → 3.0.1 broke plots on a synced
+        // account on 2026-10-05 (Rplots.pdf, no error).
+        // This pin only chooses the version installed at create; what stops
+        // VS Code auto-updating the baked extension later is the image, which
+        // since v1.3.4 marks every baked extension pinned in the extensions
+        // directory's metadata (extensions.autoUpdate itself is
+        // application-scoped, unsettable here). Lesson of 2026-10-24/25: a
+        // STABLE upstream release can be broken (3.2.1 shipped unusable plot
+        // and help viewers; fixed in 3.2.2 two days later), so every vscode-R
+        // move is an image release, checked in a fresh Codespace with
+        // plot(1:10) AND ?mean before the repin.
         // Since v1.1.7 every extension in this list is also baked in the
         // image (see the Dockerfile), so VS Code finds them installed and
         // installs nothing at attach; the list stays so the pins are
         // declared where VS Code reads them.
-        "reditorsupport.r@3.2.0",
+        "reditorsupport.r@3.2.2",
         "quarto.quarto",
         "ritwickdey.LiveServer",
         "tomoki1207.pdf",

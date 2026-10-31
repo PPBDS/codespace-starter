@@ -109,7 +109,7 @@ commands all term, so it's worth seeing them once. In order:
 **1. Stop acting as the Codespace, start acting as you.**
 
 ```bash
-unset GITHUB_TOKEN GH_TOKEN
+unset GITHUB_TOKEN
 ```
 
 A Codespace starts with a built-in login that can only *read* this
@@ -148,14 +148,18 @@ gh repo clone owner/some-assignment              # someone else's (need access)
 Either way you end up with the repo at `/workspaces/<name>`.
 
 **5. Small conveniences.** The script also copies `AGENTS.md` into the repo
-(the AI guidance — see above), makes new terminals open in your repo instead
-of the launcher, and drops your current terminal into the repo.
+(the AI guidance — see above), switches the Explorer to your repo, and drops
+your current terminal into it. Every step is
+skipped when it has already been done, and the script says so — so once you
+have your own dotfiles repo and a `GH_TOKEN` secret, it does nothing but
+create the repo. Everything it writes outside your repo lives in one folder,
+`~/.config/codespace-starter` (plus `~/.git-credentials` when step 3 runs).
 
 **Do it yourself instead?** Absolutely — this works any time, no script
 needed:
 
 ```bash
-unset GITHUB_TOKEN GH_TOKEN
+unset GITHUB_TOKEN
 gh auth login --hostname github.com --git-protocol https --web --clipboard=false
 cd /workspaces
 gh repo create my-class-work --public --clone
@@ -172,9 +176,8 @@ git commit -m "describe what you changed"
 git push
 ```
 
-What you'd give up by going manual: the auto-opening of new terminals in
-your repo, the `AGENTS.md` copy, and the ready-banner bookkeeping — all
-conveniences, none essential. Run `connect-repo --help` to
+What you'd give up by going manual: the Explorer switch, the `AGENTS.md`
+copy, and the ready-banner bookkeeping — all conveniences, none essential. Run `connect-repo --help` to
 see the same story told by the script itself.
 
 ## What's in your workshop (and when to use what)

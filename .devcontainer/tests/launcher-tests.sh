@@ -18,8 +18,11 @@ fails=0
 fail() { echo "FAIL: $*" >&2; fails=$((fails + 1)); }
 ok()   { echo "  ok: $*"; }
 
-# ---- setup.sh: wrapper + two .bashrc blocks, idempotent --------------------
-rm -f "$HOME/.student_repo"
+# ---- setup.sh: wrapper + bashrc.d snippets + ONE .bashrc block, idempotent --
+state_dir="$HOME/.config/codespace-starter"
+bashrc_d="$state_dir/bashrc.d"
+marker="$state_dir/student-repo"
+rm -f "$marker"
 if ! bash "$here/setup.sh"; then
   fail "setup.sh exited non-zero"
 fi
@@ -32,18 +35,60 @@ else
   fail "wrapper missing or not executable at $wrapper"
 fi
 
-n="$(grep -cF 'codespace-starter:short-prompt' "$HOME/.bashrc" 2>/dev/null || true)"
+# The starter's whole footprint in ~/.bashrc is one sourcing block (2026-10-30
+# consolidation): the prompt and the banner hook live in bashrc.d, and
+# connect-repo adds its snippets there too, never to ~/.bashrc.
+n="$(grep -cF 'codespace-starter:bashrc.d' "$HOME/.bashrc" 2>/dev/null || true)"
 if [[ "$n" -eq 1 ]]; then
-  ok "prompt block appended exactly once after two runs"
+  ok "bashrc.d sourcing block appended exactly once after two runs"
 else
-  fail "prompt block count in .bashrc is $n, expected 1"
+  fail "bashrc.d sourcing block count in .bashrc is $n, expected 1"
 fi
-
-n="$(grep -cF 'codespace-starter:banner' "$HOME/.bashrc" 2>/dev/null || true)"
-if [[ "$n" -eq 1 ]]; then
-  ok "banner hook appended exactly once after two runs"
+for retired in codespace-starter:short-prompt codespace-starter:banner codespace-starter:auto-cd; do
+  if grep -qF "$retired" "$HOME/.bashrc" 2>/dev/null; then
+    fail "$retired is written to .bashrc again (belongs in bashrc.d)"
+  else
+    ok "$retired is not written to .bashrc"
+  fi
+done
+if [[ -f "$bashrc_d/10-prompt.sh" ]] && grep -qF "PS1='\\W \\$ '" "$bashrc_d/10-prompt.sh"; then
+  ok "bashrc.d/10-prompt.sh sets the short prompt"
 else
-  fail "banner hook count in .bashrc is $n, expected 1"
+  fail "bashrc.d/10-prompt.sh missing or does not set PS1"
+fi
+if [[ -f "$bashrc_d/20-banner.sh" ]] && grep -qF "welcome.sh" "$bashrc_d/20-banner.sh"; then
+  ok "bashrc.d/20-banner.sh runs welcome.sh"
+else
+  fail "bashrc.d/20-banner.sh missing or does not name welcome.sh"
+fi
+# connect-repo's own snippets and marker are out of scope here (they need a
+# GitHub login), but their paths must stay inside the one state directory:
+# guard the strings the script writes.
+# shellcheck disable=SC2016  # the $state_dir / $HOME below are literal text being searched for, not expansions
+if grep -qF 'bashrc_d/30-github-token.sh' "$here/connect-repo.sh" \
+   && ! grep -qF 'auto-cd.sh' "$here/connect-repo.sh" \
+   && grep -qF 'marker="$state_dir/student-repo"' "$here/connect-repo.sh" \
+   && ! grep -qE '>> *"\$HOME/\.bashrc"' "$here/connect-repo.sh"; then
+  ok "connect-repo writes its shell state to bashrc.d, never appends to .bashrc, and has no auto-cd snippet"
+else
+  fail "connect-repo appends to .bashrc again, writes an auto-cd snippet again (dead code since 2026-10-30: new terminals follow the Explorer), or its snippets/marker left ~/.config/codespace-starter"
+fi
+# The GH_TOKEN rule (2026-10-29): never unset or blank the student's own token.
+if grep -qE 'unset +GITHUB_TOKEN +GH_TOKEN|unset +GH_TOKEN' "$here/connect-repo.sh" "$here/STUDENT_WORKFLOW.md" \
+   || grep -qF '"GH_TOKEN": ""' "$here/devcontainer.json"; then
+  fail "GH_TOKEN is unset or blanked somewhere again (logs dotfiles students out — 2026-10-29)"
+else
+  ok "GH_TOKEN is never unset or blanked"
+fi
+# And GITHUB_TOKEN is not blanked in terminals either (removed 2026-10-30): a
+# raw Codespace must look like a raw Codespace, with gh signed in as the
+# built-in token, so the GitHub tutorials' transcripts and connect-repo's
+# `unset GITHUB_TOKEN` step are both true. Dropping the token is the
+# student's (or connect-repo's) move, never the launcher's.
+if grep -qF '"GITHUB_TOKEN": ""' "$here/devcontainer.json"; then
+  fail "GITHUB_TOKEN is blanked in terminals again (signs gh out in a raw Codespace — 2026-10-30)"
+else
+  ok "GITHUB_TOKEN is not blanked in terminals"
 fi
 
 # Retired side effects must stay retired (one-terminal design, 2026-10).
@@ -57,7 +102,7 @@ fi
 # The "shown" marker is normally touched 10 s after printing; the tests set
 # the delay to 0 so it lands immediately, and clear it before every run that
 # expects a banner.
-shown="$HOME/.config/codespace-starter/banner-shown"
+shown="$state_dir/banner-shown"
 export CODESPACE_STARTER_BANNER_DELAY=0
 # The hook also requires a terminal on stdout (so the devcontainer env probe's
 # invisible interactive shell never consumes the one showing); CI has no pty,
@@ -179,7 +224,7 @@ fi
 # ---- welcome.sh with marker: silence ------------------------------------
 # connect-repo reports the connected repo itself; once its marker exists the
 # banner must print nothing at all, in the hook and when run directly.
-echo "test-repo" > "$HOME/.student_repo"
+echo "test-repo" > "$marker"
 rm -f "$shown"
 out2="$(bash "$here/welcome.sh")"
 if [[ -z "$out2" ]]; then
@@ -193,7 +238,7 @@ if grep -q "YOUR CODESPACE IS READY" <<<"$hook_out2"; then
 else
   ok "interactive shell is quiet once the marker exists"
 fi
-rm -f "$HOME/.student_repo"
+rm -f "$marker"
 
 # ---- wrapper-install failure: banner must fall back to the long form ----
 # Simulate the install failing by making $HOME/.local/bin a regular FILE

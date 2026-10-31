@@ -141,12 +141,17 @@
   //   creates immediately, with no image rebuild or pin bump needed.
 
   // One-time per-Codespace setup (setup.sh): installs the `connect-repo`
-  // wrapper on PATH, the short beginner prompt, and a ~/.bashrc hook that
-  // prints the "YOUR CODESPACE IS READY" banner (welcome.sh) in the terminal
-  // Codespaces opens on its own. onCreateCommand runs at PREBUILD time (or at
-  // create when no prebuild is available), so all of it is in place before
-  // the first terminal exists; its output goes to the hidden creation log,
-  // which is fine because it prints nothing students need.
+  // wrapper on PATH, and two shell snippets — the short beginner prompt and
+  // the hook that prints the "YOUR CODESPACE IS READY" banner (welcome.sh) in
+  // the terminal Codespaces opens on its own — in
+  // ~/.config/codespace-starter/bashrc.d, sourced by ONE block appended to
+  // ~/.bashrc. That directory is the only place any starter script writes
+  // in the student's home (connect-repo adds its snippets and repo marker
+  // there too), so a student's own dotfiles can tell our lines from theirs
+  // (2026-10-30). onCreateCommand runs at PREBUILD time (or at create when
+  // no prebuild is available), so all of it is in place before the first
+  // terminal exists; its output goes to the hidden creation log, which is
+  // fine because it prints nothing students need.
   //
   // ONE terminal, by design (2026-10). Until then the banner came from a
   // postAttachCommand, which runs in a visible terminal — but that terminal
@@ -251,16 +256,31 @@
         // DELIBERATELY ABSENT note in the extensions list above. Restore both
         // settings if those extensions ever return.)
 
-        // Blank the built-in, repo-scoped GITHUB_TOKEN / GH_TOKEN in integrated
-        // terminals — INCLUDING the R console (arf), which the R extension
-        // launches with the VS Code server's environment. Without this, R's
-        // remotes/pak see GITHUB_TOKEN and nag on every install_github:
-        // "Using github PAT from envvar GITHUB_TOKEN ... use the more secure
-        // credential store instead." Emptied here, they fall back to the git
-        // credential store (your token, set by connect-repo) — so installs are
-        // authenticated AND quiet. This does NOT affect postCreateCommand (a
-        // lifecycle hook, not a terminal), so the baked-package refresh keeps
-        // the built-in token and avoids GitHub API rate limits.
+        // GITHUB_TOKEN is NOT blanked in terminals — REMOVED 2026-10-30. Until
+        // then this block emptied it in every integrated terminal (including
+        // the R console), to silence remotes' "Using github PAT from envvar
+        // GITHUB_TOKEN ... use the more secure credential store" nag on
+        // install_github. A live check in a fresh Codespace showed the cost:
+        // the blank really holds in bash (echo "[$GITHUB_TOKEN]" printed [],
+        // `gh auth status` said "not logged into any GitHub hosts"), so a raw
+        // Codespace here did NOT look like a raw Codespace, where gh is signed
+        // in as the built-in token — and the GitHub Introduction tutorial's
+        // raw-machine transcript, which shows "(GITHUB_TOKEN)", was wrong for
+        // our students. Removing the blank makes that tutorial true again,
+        // makes connect-repo's `unset GITHUB_TOKEN` step do real work (it was
+        // redundant inside terminals), and keeps R's GitHub API calls via pak
+        // authenticated, so a classroom of Codespaces behind shared IPs does
+        // not hit the anonymous 60/hour rate limit. The remotes nag returns
+        // only for remotes::install_github, which the course does not use
+        // (every install goes through pak::pkg_install, which does not nag).
+        // If the nag ever matters, the right fix is one line in the IMAGE's
+        // Rprofile.site, guarded on CODESPACES — next to R, not here.
+        // GH_TOKEN is likewise never touched (2026-10-29): Codespaces never
+        // sets it, and the Dotfiles tutorial has students store a personal
+        // access token as the Codespaces user secret GH_TOKEN, which gh
+        // prefers over GITHUB_TOKEN and which `gh auth git-credential` hands
+        // to git — that is what signs a fresh Codespace in as the student
+        // without connect-repo. Blanking it here silently undid that.
         // PKG_SYSREQS=false stops pak from trying to `sudo apt-get install`
         // system requirements when a student installs an R package — the
         // non-root rstudio user can't sudo, so e.g. a package pulling in V8
@@ -275,8 +295,6 @@
         // libnode-dev" false positive is handled in the image via a metadata
         // libnode-dev-virtual package — see the devcontainers Dockerfile.)
         "terminal.integrated.env.linux": {
-          "GITHUB_TOKEN": "",
-          "GH_TOKEN": "",
           "PKG_SYSREQS": "false"
         },
 
@@ -364,8 +382,8 @@
         // Indicator, was REMOVED from VS Code on 2025-10-08 (microsoft/vscode
         // 0d826f5) — which is why setting it "off" in 2026-08 did nothing.
         // Harmless: the contribution it warns about is irrelevant here (git
-        // auth comes from the container's credential store, and
-        // GITHUB_TOKEN/GH_TOKEN are blanked anyway). Do not try again.
+        // auth comes from the container's credential store). Do not try
+        // again.
 
         // No "Type copilot to use Copilot CLI. Don't show this again" ghost
         // text in an empty terminal. That is VS Code's terminal initial

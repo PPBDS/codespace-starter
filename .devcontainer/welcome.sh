@@ -2,13 +2,14 @@
 #
 # welcome.sh — the "your Codespace is ready" banner.
 #
-# Run by a hook at the end of ~/.bashrc (installed by setup.sh from
-# onCreateCommand), so it prints in the FIRST terminal Codespaces opens, and
-# only there: later terminals start clean (David, 2026-10-05). Two markers
-# make it quiet:
-#   - ~/.student_repo (written by connect-repo): the student has a repo, so
+# Run by the bashrc.d/20-banner.sh snippet (installed by setup.sh from
+# onCreateCommand and sourced from ~/.bashrc), so it prints in the FIRST
+# terminal Codespaces opens, and only there: later terminals start clean
+# (David, 2026-10-05). Two markers, both in ~/.config/codespace-starter — the
+# one place the starter keeps its state — make it quiet:
+#   - student-repo (written by connect-repo): the student has a repo, so
 #     there is nothing to say; connect-repo reports the connected repo itself.
-#   - ~/.config/codespace-starter/banner-shown: the banner has been printed
+#   - banner-shown: the banner has been printed
 #     once in this Codespace. It is touched TEN SECONDS after printing, from
 #     a detached background sleep, not immediately — the same trick the
 #     devcontainers base uses for its first-run notice — so that if VS Code
@@ -31,8 +32,9 @@
 set -uo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # codespace-starter/.devcontainer
-marker="$HOME/.student_repo"
-shown="$HOME/.config/codespace-starter/banner-shown"
+state_dir="$HOME/.config/codespace-starter"
+marker="$state_dir/student-repo"
+shown="$state_dir/banner-shown"
 
 # Once connect-repo has run, or once the banner has had its one showing,
 # there is nothing to say.

@@ -94,7 +94,8 @@ dotfiles repo and a GH_TOKEN secret of your own.
      git still carries the built-in token, which `gh` would hand over — so
      the Sync button needs the file (or a GH_TOKEN secret, see the Dotfiles
      tutorial). (Skipped when a GH_TOKEN secret plus a `gh auth
-     git-credential` helper in your Git config already do this.)
+     git-credential` helper in your Git config — set by `gh auth setup-git`
+     or by your dotfiles — already do this.)
 
   4. CREATE A NEW REPO, OR CONNECT TO ONE THAT EXISTS
      New repo on your account (doesn't exist yet):
@@ -231,15 +232,29 @@ fi
 #     student's own work. Either half alone is not enough (the helper without
 #     GH_TOKEN would hand the panel the built-in token), so then we still
 #     write the store.
-if [[ -n "${GH_TOKEN:-}" ]] && git config --get-all credential.helper 2>/dev/null | grep -q 'gh auth git-credential'; then
+#     The helper may be set under the plain key (credential.helper, what the
+#     Dotfiles tutorial's gitconfig fragment writes) or host-scoped
+#     (credential.https://github.com.helper, what `gh auth setup-git` writes);
+#     --get-regexp over both key forms catches either (2026-10-31: a check
+#     against the plain key alone wrote the store for a user who already had
+#     GH_TOKEN, i.e. it missed their helper).
+if [[ -n "${GH_TOKEN:-}" ]] && git config --get-regexp '^credential\.(https://github\.com/?\.)?helper$' 2>/dev/null | grep -q 'gh auth git-credential'; then
   skip "git config credential.helper — your gitconfig already sends git to gh, and gh has your GH_TOKEN"
 else
-  run "git config --global credential.helper store   (+ your token into ~/.git-credentials, so the Source Control pane's Sync button pushes as you; by hand you would run 'gh auth setup-git' — see --help)"
   token="$(gh auth token)"
-  git config --global --replace-all credential.helper ""    # clear inherited (Codespaces) helpers
-  git config --global --add         credential.helper store
-  printf 'https://x-access-token:%s@github.com\n' "$token" > "$HOME/.git-credentials"
-  chmod 600 "$HOME/.git-credentials"
+  # Idempotent: an earlier run in this Codespace already saved this very
+  # token and made the store the helper — say so instead of rewriting it.
+  if [[ -f "$HOME/.git-credentials" ]] \
+     && grep -qF "x-access-token:${token}@github.com" "$HOME/.git-credentials" \
+     && git config --global --get-all credential.helper 2>/dev/null | grep -qx 'store'; then
+    skip "git config credential.helper — your token is already saved in ~/.git-credentials"
+  else
+    run "git config --global credential.helper store   (saves your token in ~/.git-credentials so the Sync button pushes as you; see --help)"
+    git config --global --replace-all credential.helper ""    # clear inherited (Codespaces) helpers
+    git config --global --add         credential.helper store
+    printf 'https://x-access-token:%s@github.com\n' "$token" > "$HOME/.git-credentials"
+    chmod 600 "$HOME/.git-credentials"
+  fi
 fi
 
 # 4. Create the repo — or clone it if it already exists (yours, an org's, or a

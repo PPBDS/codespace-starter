@@ -88,8 +88,8 @@ v <- as.character(utils::packageVersion('learnr2'))
 has <- exists('load_tutorial', asNamespace('learnr2'))
 cat('learnr2', v, if (has) 'with load_tutorial()' else 'WITHOUT load_tutorial()', '\n')
 if (!has) {
-  cat('\nThis test needs learnr2 >= 0.1.3.9013 (load_tutorial(), the Load Answers button,\n',
-      'package/tutorial fields and fingerprints in the answers file). The image bakes', v, '.\n',
+  cat(sep = '', '\nThis test needs learnr2 >= 0.1.3.9013 (load_tutorial(), the Load Answers button,\n',
+      'package/tutorial fields and fingerprints in the answers file). The image bakes ', v, '.\n',
       'The next image release picks up learnr2 HEAD (COURSE_PKG_REFRESH); until then this\n',
       'check fails here, deliberately. To prove the test itself, dispatch the workflow with\n',
       'learnr2 = PPBDS/learnr2.\n')

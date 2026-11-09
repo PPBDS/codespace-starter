@@ -11,6 +11,11 @@
 # image tag is read live from devcontainer.json, exactly as launcher-tests
 # does, so this is not another place to bump the pin.
 #
+# On an image whose learnr2 predates load_tutorial() (< 0.1.3.9013) only the
+# answer-and-download half runs and the job passes with a warning
+# annotation; the restore half switches on by itself once a release bakes a
+# newer learnr2. The test never blocks the image.
+#
 # Not yet: looping over every tutorial in all three packages on a nightly
 # schedule. Orientation only, on PRs, was the decision on 2026-11-08; the
 # script already takes TUTORIAL_E2E_PACKAGE / TUTORIAL_E2E_TUTORIAL for when

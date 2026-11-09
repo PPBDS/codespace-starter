@@ -207,7 +207,17 @@ def write(path, data):
         json.dump(data, fh, indent=2)
 
 
-def check_file(d, label, expect_package, expect_tutorial):
+def check_file(d, label, expect_package, expect_tutorial, legacy=False):
+    if legacy:
+        # learnr2 < 0.1.3.9013 recorded neither the tutorial's identity nor
+        # a fingerprint; the answers and the student info are all there is.
+        if not d.get("answers"):
+            fail(f"{label}: no answers")
+        if d.get("info", {}).get("name") != NAME or d.get("info", {}).get("email") != EMAIL:
+            fail(f"{label}: student info not recorded: {d.get('info')}")
+        log(f"{label}: legacy file, {len(d['answers'])} answers, "
+            f"{sum(a['answer'] is None for a in d['answers'])} unanswered")
+        return
     if d.get("package") != expect_package or d.get("tutorial") != expect_tutorial:
         fail(f"{label}: package/tutorial = {d.get('package')}/{d.get('tutorial')}, "
              f"expected {expect_package}/{expect_tutorial}")
@@ -260,13 +270,13 @@ def cmd_full(args):
         if len(answered) != total:
             fail(f"answered {len(answered)} of {total} questions")
         d = download(page, args.out)
-        check_file(d, "A", args.package, args.tutorial)
+        check_file(d, "A", args.package, args.tutorial, legacy=args.legacy)
         missing = [a["id"] for a in d["answers"] if a["answer"] is None]
         if missing:
             fail(f"A has unanswered questions after a full run: {missing}")
         images = [a["id"] for a in d["answers"] if isinstance(a["answer"], str) and a["answer"].startswith("data:image/")]
         log(f"screenshot answers recorded for: {images}")
-        if d.get("loadedFrom") is not None:
+        if not args.legacy and d.get("loadedFrom") is not None:
             fail("A claims to be loaded from an earlier file, but this was a fresh run")
     with_browser(args, run)
 
@@ -371,6 +381,8 @@ def main(argv):
     p.add_argument("--package", default="vscode.tutorials")
     p.add_argument("--tutorial", default="orientation")
     p.add_argument("--shots", help="directory for a screenshot when a browser step fails")
+    p.add_argument("--legacy", action="store_true",
+                   help="the page's learnr2 predates 0.1.3.9013: no tutorial identity or fingerprint in the file")
     sub = p.add_subparsers(dest="command", required=True)
 
     s = sub.add_parser("full")

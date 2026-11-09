@@ -83,6 +83,37 @@ if [ -n "${TUTORIAL_E2E_LEARNR2:-}" ]; then
 fi
 
 step "learnr2 in this image"
+learnr2_version="$(Rscript -e "cat(as.character(utils::packageVersion('learnr2')))")"
+has_load="$(Rscript -e "cat(if (exists('load_tutorial', asNamespace('learnr2'))) 'yes' else 'no')")"
+echo "learnr2 $learnr2_version, load_tutorial(): $has_load"
+legacy=()
+if [ "$has_load" != yes ]; then
+  # The restore half of this test (load_tutorial(), the page's Load Answers
+  # button, fingerprints, package/tutorial fields in the file) needs
+  # learnr2 >= 0.1.3.9013. An image that bakes an older learnr2 still gets
+  # the first half -- a student answers everything and downloads -- and the
+  # run PASSES with a warning annotation, so the image is not held hostage
+  # to a test. The restore steps switch on by themselves once an image
+  # release bakes a newer learnr2 (the course-package refresh pulls HEAD).
+  echo "::warning title=tutorial-e2e: restore steps skipped::image bakes learnr2 $learnr2_version, which has no load_tutorial(); only the answer-and-download half ran. The next image release (learnr2 >= 0.1.3.9013) enables the restore steps."
+  legacy=(--legacy)
+fi
+
+# open = TRUE is what makes run_tutorial() serve and block; its default is
+# interactive(), which is FALSE under Rscript, so without it the process
+# renders and exits. The browser option swallows the open-a-tab step.
+if [ -n "${TUTORIAL_E2E_LEARNR2:-}" ]; then
+  # Development knob (workflow_dispatch input "learnr2"): install a learnr2
+  # from GitHub over the baked one, to prove the test against a learnr2 the
+  # image does not ship yet. The default run tests the image as students
+  # get it. The cached render goes stale (its stamp records the learnr2
+  # version), so run_tutorial() re-renders the tutorial first.
+  step "Installing learnr2 from $TUTORIAL_E2E_LEARNR2 over the baked copy (development knob)"
+  Rscript -e "pak::pkg_install('$TUTORIAL_E2E_LEARNR2', ask = FALSE)" >"$out/learnr2-install.log" 2>&1 \
+    || { tail -30 "$out/learnr2-install.log"; exit 1; }
+fi
+
+step "learnr2 in this image"
 Rscript -e "
 v <- as.character(utils::packageVersion('learnr2'))
 has <- exists('load_tutorial', asNamespace('learnr2'))
@@ -113,8 +144,13 @@ curl -fsS -o /dev/null "$url" || { echo "no answer from $url after 10 minutes:";
 grep -E 'as rendered|Rendering|Opening' "$out/server.log" || true
 
 step "1. A student answers every question and downloads (A.json)"
-"$py" "$here/e2e.py" --package "$pkg" --tutorial "$name" --shots "$out" \
+"$py" "$here/e2e.py" --package "$pkg" --tutorial "$name" --shots "$out" "${legacy[@]}" \
   full --url "$url" --out "$out/A.json"
+
+if [ "$has_load" != yes ]; then
+  printf '\nTUTORIAL E2E OK (answer + download only): %s/%s on learnr2 %s; restore steps skipped, see the warning above.\n' "$pkg" "$name" "$learnr2_version"
+  exit 0
+fi
 
 step "2. Blank the last $leave answers to make an unfinished file (P.json)"
 "$py" "$here/e2e.py" partial --answers "$out/A.json" --out "$out/P.json" --leave "$leave"

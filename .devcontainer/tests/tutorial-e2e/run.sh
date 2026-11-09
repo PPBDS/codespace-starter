@@ -102,31 +102,6 @@ fi
 # open = TRUE is what makes run_tutorial() serve and block; its default is
 # interactive(), which is FALSE under Rscript, so without it the process
 # renders and exits. The browser option swallows the open-a-tab step.
-if [ -n "${TUTORIAL_E2E_LEARNR2:-}" ]; then
-  # Development knob (workflow_dispatch input "learnr2"): install a learnr2
-  # from GitHub over the baked one, to prove the test against a learnr2 the
-  # image does not ship yet. The default run tests the image as students
-  # get it. The cached render goes stale (its stamp records the learnr2
-  # version), so run_tutorial() re-renders the tutorial first.
-  step "Installing learnr2 from $TUTORIAL_E2E_LEARNR2 over the baked copy (development knob)"
-  Rscript -e "pak::pkg_install('$TUTORIAL_E2E_LEARNR2', ask = FALSE)" >"$out/learnr2-install.log" 2>&1 \
-    || { tail -30 "$out/learnr2-install.log"; exit 1; }
-fi
-
-step "learnr2 in this image"
-Rscript -e "
-v <- as.character(utils::packageVersion('learnr2'))
-has <- exists('load_tutorial', asNamespace('learnr2'))
-cat('learnr2', v, if (has) 'with load_tutorial()' else 'WITHOUT load_tutorial()', '\n')
-if (!has) {
-  cat(sep = '', '\nThis test needs learnr2 >= 0.1.3.9013 (load_tutorial(), the Load Answers button,\n',
-      'package/tutorial fields and fingerprints in the answers file). The image bakes ', v, '.\n',
-      'The next image release picks up learnr2 HEAD (COURSE_PKG_REFRESH); until then this\n',
-      'check fails here, deliberately. To prove the test itself, dispatch the workflow with\n',
-      'learnr2 = PPBDS/learnr2.\n')
-  quit(status = 2)
-}"
-
 step "Serve $pkg/$name on :$port with learnr2::run_tutorial() (browser suppressed)"
 Rscript -e "options(browser = function(url) message('browser suppressed; would open ', url)); learnr2::run_tutorial('$name', package = '$pkg', output_dir = '$root', open = TRUE)" \
   >"$out/server.log" 2>&1 &

@@ -163,11 +163,19 @@ def walk(page):
         cont = page.locator(".learnr2-continue")
         if cont.count() == 0:
             return answered
-        button = cont.first
-        if button.is_disabled():
+        # quiz.js re-evaluates the gate on a zero-delay timeout after any
+        # Submit click, so give it a moment before concluding it is stuck.
+        try:
+            page.wait_for_function(
+                "() => { const b = document.querySelector('.learnr2-continue'); return !b || !b.disabled; }",
+                timeout=5000,
+            )
+        except PWTimeout:
             note = page.locator(".learnr2-continue-note").first.inner_text()
             fail(f"Continue is locked but nothing visible is pending: {note!r}")
-        button.click()
+        if cont.count() == 0:
+            return answered
+        cont.first.click()
         page.wait_for_timeout(50)
     fail("walk() did not reach the last section")
 

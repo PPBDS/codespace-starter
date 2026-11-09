@@ -23,6 +23,15 @@ on:
     branches: [main]
     paths: ['.devcontainer/**', '.github/workflows/tutorial-e2e.yml']
   workflow_dispatch:
+    inputs:
+      learnr2:
+        description: >-
+          Development knob: a pak-style GitHub ref (e.g. PPBDS/learnr2 or
+          PPBDS/learnr2@<sha>) to install over the image's learnr2, to prove
+          the test against a learnr2 the image does not bake yet. Leave empty
+          to test the image as students get it.
+        required: false
+        default: ''
 
 jobs:
   pin:
@@ -54,6 +63,7 @@ jobs:
       - name: Run the tutorial end to end
         env:
           TUTORIAL_E2E_OUT: ${{ runner.temp }}/tutorial-e2e
+          TUTORIAL_E2E_LEARNR2: ${{ inputs.learnr2 }}
         run: bash .devcontainer/tests/tutorial-e2e/run.sh
 
       # The three answer files, the server and load_tutorial() logs, and a

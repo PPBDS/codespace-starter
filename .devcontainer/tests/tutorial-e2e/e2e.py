@@ -69,7 +69,7 @@ return Array.from(document.querySelectorAll('.learnr2-question[data-learnr2-ques
 """
 
 JS_INFO_LOCKED = """() => {
-  const n = document.querySelector('#student-info-name');
+  const n = document.querySelector('.learnr2-info-rendered input[id$="-name"]');
   return !!(n && n.disabled);
 }"""
 
@@ -114,9 +114,11 @@ def wait_ready(page):
 
 def submit_info(page):
     form = page.locator(INFO).first
-    form.locator("#student-info-name").fill(NAME)
-    form.locator("#student-info-email").fill(EMAIL)
-    sid = form.locator("#student-info-id")
+    # Inputs are id'd "<form id>-<field key>"; the form id has varied across
+    # learnr2 versions, the suffix has not.
+    form.locator('input[id$="-name"]').fill(NAME)
+    form.locator('input[id$="-email"]').fill(EMAIL)
+    sid = form.locator('input[id$="-id"]')
     if sid.count():
         sid.fill(STUDENT_ID)
     form.locator(".learnr2-controls .learnr2-submit").click()

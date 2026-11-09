@@ -1,0 +1,66 @@
+# Tutorial end-to-end test: inside the SAME pinned image students get, serve
+# the Orientation tutorial with learnr2, answer it in a headless browser as a
+# student would, download the answers, blank the tail of the file, restore it
+# with learnr2::load_tutorial(), finish, download again, and repeat the
+# restore through the page's own "Load Answers" button. See
+# .devcontainer/tests/tutorial-e2e/run.sh for the steps and what is
+# deliberately out of scope (the VS Code layer).
+#
+# Runs on every pull request, because the pin bump IS the typical PR here and
+# this is the check that the new image still runs a tutorial end to end. The
+# image tag is read live from devcontainer.json, exactly as launcher-tests
+# does, so this is not another place to bump the pin.
+#
+# Not yet: looping over every tutorial in all three packages on a nightly
+# schedule. Orientation only, on PRs, was the decision on 2026-11-08; the
+# script already takes TUTORIAL_E2E_PACKAGE / TUTORIAL_E2E_TUTORIAL for when
+# that is revisited.
+name: tutorial-e2e
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths: ['.devcontainer/**', '.github/workflows/tutorial-e2e.yml']
+  workflow_dispatch:
+
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.get.outputs.image }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: get
+        run: |
+          img="$(grep -o 'ghcr\.io/ppbds/devcontainer:[0-9][0-9.]*' .devcontainer/devcontainer.json | head -1)"
+          if [ -z "$img" ]; then
+            echo "::error file=.devcontainer/devcontainer.json::could not extract the image pin (ghcr.io/ppbds/devcontainer:X.Y.Z) — did the pin line change format?"
+            exit 1
+          fi
+          echo "image=$img" >> "$GITHUB_OUTPUT"
+          echo "testing against $img"
+
+  orientation:
+    needs: pin
+    runs-on: ubuntu-latest
+    name: Orientation end to end in the student image
+    timeout-minutes: 45
+    container:
+      image: ${{ needs.pin.outputs.image }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run the tutorial end to end
+        env:
+          TUTORIAL_E2E_OUT: ${{ runner.temp }}/tutorial-e2e
+        run: bash .devcontainer/tests/tutorial-e2e/run.sh
+
+      # The three answer files, the server and load_tutorial() logs, and a
+      # screenshot of the page if a browser step failed.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tutorial-e2e-${{ github.run_id }}
+          path: ${{ runner.temp }}/tutorial-e2e
+          if-no-files-found: ignore

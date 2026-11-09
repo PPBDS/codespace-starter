@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - run: shellcheck .devcontainer/setup.sh .devcontainer/welcome.sh .devcontainer/connect-repo.sh .devcontainer/tests/launcher-tests.sh
+      - run: shellcheck .devcontainer/setup.sh .devcontainer/welcome.sh .devcontainer/connect-repo.sh .devcontainer/tests/launcher-tests.sh .devcontainer/tests/tutorial-e2e/run.sh
 
   test:
     needs: pin

@@ -49,7 +49,20 @@ step "Playwright $playwright_version + Chromium"
 venv=/tmp/tutorial-e2e-venv
 uv venv -q --python /usr/bin/python3 "$venv"
 uv pip install -q --python "$venv/bin/python" "playwright==$playwright_version"
-if ! "$venv/bin/playwright" install --with-deps chromium >"$out/playwright-install.log" 2>&1; then
+# --with-deps runs apt-get for Chromium's libraries and fonts. The image
+# ships no package lists, and one CI run saw "no installation candidate"
+# for every package when apt's own update hiccuped, so refresh the lists
+# with retries first and give the install itself a second try.
+for attempt in 1 2 3; do
+  if apt-get update -qq >>"$out/playwright-install.log" 2>&1; then break; fi
+  echo "apt-get update failed (attempt $attempt); retrying"; sleep 15
+done
+installed=false
+for attempt in 1 2; do
+  if "$venv/bin/playwright" install --with-deps chromium >>"$out/playwright-install.log" 2>&1; then installed=true; break; fi
+  echo "playwright install failed (attempt $attempt)"; sleep 15
+done
+if [ "$installed" != true ]; then
   tail -40 "$out/playwright-install.log"
   exit 1
 fi

@@ -55,8 +55,11 @@ if ! "$venv/bin/playwright" install --with-deps chromium >"$out/playwright-insta
 fi
 py="$venv/bin/python"
 
+# open = TRUE is what makes run_tutorial() serve and block; its default is
+# interactive(), which is FALSE under Rscript, so without it the process
+# renders and exits. The browser option swallows the open-a-tab step.
 step "Serve $pkg/$name on :$port with learnr2::run_tutorial() (browser suppressed)"
-Rscript -e "options(browser = function(url) message('browser suppressed; would open ', url)); learnr2::run_tutorial('$name', package = '$pkg', output_dir = '$root')" \
+Rscript -e "options(browser = function(url) message('browser suppressed; would open ', url)); learnr2::run_tutorial('$name', package = '$pkg', output_dir = '$root', open = TRUE)" \
   >"$out/server.log" 2>&1 &
 server=$!
 trap 'kill "$server" 2>/dev/null || true' EXIT

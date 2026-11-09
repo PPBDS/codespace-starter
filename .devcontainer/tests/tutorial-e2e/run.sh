@@ -68,9 +68,6 @@ if [ "$installed" != true ]; then
 fi
 py="$venv/bin/python"
 
-# open = TRUE is what makes run_tutorial() serve and block; its default is
-# interactive(), which is FALSE under Rscript, so without it the process
-# renders and exits. The browser option swallows the open-a-tab step.
 if [ -n "${TUTORIAL_E2E_LEARNR2:-}" ]; then
   # Development knob (workflow_dispatch input "learnr2"): install a learnr2
   # from GitHub over the baked one, to prove the test against a learnr2 the
